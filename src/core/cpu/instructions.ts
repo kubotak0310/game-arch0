@@ -1,5 +1,7 @@
-import type { Instruction, Registers, Flags, AnyRegisterName } from './types.ts'
+import type { Instruction, Registers, Flags, AnyRegisterName, RuntimeError } from './types.ts'
 import type { Memory } from './memory.ts'
+
+export const USER_MEM_MAX = 0x3F
 
 export interface MutableCpuState {
   registers: Registers
@@ -9,6 +11,7 @@ export interface MutableCpuState {
   sp: number
   lr: number
   halted: boolean
+  error?: RuntimeError
 }
 
 function readRegister(state: MutableCpuState, name: AnyRegisterName): number {

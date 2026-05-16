@@ -69,6 +69,7 @@ export interface ExecutionResult {
   changedRegisters: AnyRegisterName[]
   changedMemoryAddresses: number[]
   changedFlags: (keyof Flags)[]
+  executedType?: InstructionType
   error?: RuntimeError
 }
 

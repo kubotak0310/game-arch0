@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useDebugMode } from '../composables/useDebugMode.ts'
 
 // コピー状態（2秒でリセット）
 const copied = ref(false)
@@ -22,6 +23,7 @@ import { useCpuStore } from '../stores/cpu.ts'
 import { stage1 } from '../data/stages/chapter1/s01-first-value.ts'
 
 const cpuStore = useCpuStore()
+const { isDebugMode } = useDebugMode()
 
 const source = ref('')
 const stage = stage1
@@ -68,8 +70,6 @@ function errorPcLabel(errLine: number): string {
   return `PC ${count}`
 }
 
-// Right panel tab: memory or stack
-const rightTab = ref<'memory' | 'stack'>('memory')
 </script>
 
 <template>
@@ -84,6 +84,9 @@ const rightTab = ref<'memory' | 'stack'>('memory')
       </div>
       <div v-if="cpuStore.isCleared" class="badge badge-clear">
         ✓ クリア！
+      </div>
+      <div v-if="isDebugMode" class="badge badge-debug">
+        DEBUG
       </div>
     </header>
 
@@ -162,26 +165,11 @@ const rightTab = ref<'memory' | 'stack'>('memory')
         </div>
       </div>
 
-      <!-- 右：メモリ / スタック -->
+      <!-- 右：メモリ（上）/ スタック（下） -->
       <div class="right-pane">
-        <div class="tab-bar">
-          <button
-            class="tab-btn"
-            :class="{ active: rightTab === 'memory' }"
-            @click="rightTab = 'memory'"
-          >
-            メモリ
-          </button>
-          <button
-            class="tab-btn"
-            :class="{ active: rightTab === 'stack' }"
-            @click="rightTab = 'stack'"
-          >
-            スタック
-          </button>
-        </div>
-        <MemoryView v-show="rightTab === 'memory'" />
-        <StackView v-show="rightTab === 'stack'" />
+        <MemoryView />
+        <div class="right-divider" />
+        <StackView />
       </div>
 
     </div>
@@ -245,11 +233,18 @@ const rightTab = ref<'memory' | 'stack'>('memory')
   background: color-mix(in srgb, var(--color-accent-green) 12%, transparent);
   border-color: color-mix(in srgb, var(--color-accent-green) 30%, transparent);
 }
+.badge-debug {
+  color: var(--color-accent-amber);
+  background: color-mix(in srgb, var(--color-accent-amber) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent-amber) 30%, transparent);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
 
 /* ── メイン3カラム ── */
 .stage-main {
   display: grid;
-  grid-template-columns: 1.1fr 0.85fr 1.2fr;
+  grid-template-columns: 1.4fr 0.85fr 1.0fr;
   flex: 1;
   overflow: hidden;
   padding: 8px;
@@ -263,7 +258,7 @@ const rightTab = ref<'memory' | 'stack'>('memory')
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   padding: 6px 8px 6px 12px;
   background: var(--color-surface-2);
   border-bottom: 1px solid var(--color-border);
@@ -345,7 +340,7 @@ const rightTab = ref<'memory' | 'stack'>('memory')
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   margin: 0 0 8px;
 }
 .condition-list {
@@ -408,40 +403,19 @@ const rightTab = ref<'memory' | 'stack'>('memory')
   margin-top: 2px;
 }
 
-/* ── 右パネル：メモリ/スタック ── */
+/* ── 右パネル：メモリ（上）/ スタック（下） ── */
 .right-pane {
   background: var(--color-surface);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
   border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
-.tab-bar {
-  display: flex;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface-2);
-  border-radius: 8px 8px 0 0;
+.right-divider {
+  height: 1px;
+  background: var(--color-border);
   flex-shrink: 0;
-}
-.tab-btn {
-  flex: 1;
-  padding: 7px 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-}
-.tab-btn:hover {
-  color: var(--color-text-secondary);
-}
-.tab-btn.active {
-  color: var(--color-text);
-  border-bottom-color: var(--color-accent-blue);
 }
 </style>

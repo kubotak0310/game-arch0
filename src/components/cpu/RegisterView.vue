@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useCpuStore } from '../../stores/cpu.ts'
 
 const cpuStore = useCpuStore()
@@ -29,6 +29,7 @@ const regValue = (name: string) =>
 
 const isR0 = (name: string) => name === 'R0'
 const isZero = (name: string) => regValue(name) === 0
+const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RET')
 </script>
 
 <template>
@@ -46,6 +47,7 @@ const isZero = (name: string) => regValue(name) === 0
         }"
       >
         <span class="reg-name">{{ name }}</span>
+        <span v-if="name === 'R1' && showReturnBadge" class="badge-return">戻り値</span>
         <div class="reg-values">
           <span class="reg-dec">{{ formatDec(regValue(name)) }}</span>
           <span class="reg-hex">{{ formatHex(regValue(name)) }}</span>
@@ -64,7 +66,7 @@ const isZero = (name: string) => regValue(name) === 0
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   margin: 0 0 8px;
 }
 .register-list {
@@ -101,6 +103,16 @@ const isZero = (name: string) => regValue(name) === 0
   color: var(--color-accent-blue);
   width: 28px;
   flex-shrink: 0;
+}
+.badge-return {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--color-accent-amber);
+  background: color-mix(in srgb, var(--color-accent-amber) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent-amber) 35%, transparent);
 }
 .reg-values {
   display: flex;

@@ -69,7 +69,9 @@ const isEmpty = computed(() => stackEntries.value.length === 0)
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px 6px;
+  padding: 6px 8px 6px 12px;
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 .section-title {
@@ -77,7 +79,7 @@ const isEmpty = computed(() => stackEntries.value.length === 0)
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   margin: 0;
 }
 .sp-label {
@@ -114,7 +116,7 @@ const isEmpty = computed(() => stackEntries.value.length === 0)
 }
 .stack-addr {
   color: var(--color-text-tertiary);
-  font-size: 10px;
+  font-size: 13px;
 }
 .stack-value {
   color: var(--color-text);

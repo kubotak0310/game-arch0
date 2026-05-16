@@ -45,7 +45,11 @@
 
 ### コンポーネント
 - [x] `src/components/editor/CodeEditor.vue` — CodeMirror 6 基本統合
-- [x] `src/components/cpu/RegisterView.vue` — R1〜R5のレジスタ表示（変化時に緑ハイライト）
+- [x] `src/components/cpu/RegisterView.vue` — レジスタ表示（変化時に緑ハイライト・R1のRET後「戻り値」バッジ）
+- [x] `src/components/cpu/FlagsView.vue` — N/Z/C/V フラグ表示
+- [x] `src/components/cpu/ControlRegsView.vue` — PC/SP/LR 制御レジスタ表示
+- [x] `src/components/cpu/MemoryView.vue` — メモリ表示（8×8固定・0x00〜0x3F）
+- [x] `src/components/cpu/StackView.vue` — スタック表示（SP相対エントリ一覧）
 - [x] `src/components/execution/ExecutionControl.vue` — 実行・ステップ・リセットボタン
 
 ### ステージデータ
@@ -53,8 +57,12 @@
 - [x] `src/data/stages/chapter1/s01-first-value.ts` — ステージ1データ（`c1-s01-first-value`）
 
 ### 画面
-- [x] `src/views/StageView.vue` — 2カラムレイアウト（エディタ左 1.4fr / CPU表示・課題 右 1fr）
+- [x] `src/views/StageView.vue` — 3カラムレイアウト（エディタ 1.4fr / CPU状態 0.85fr / メモリ+スタック縦並び 1.0fr）
 - [x] クリア判定ロジック（`successConditions` と実行結果の照合）
+
+### デバッグ・開発支援
+- [x] `src/composables/useDebugMode.ts` — `?debug` URLクエリでデバッグモード切替（命令制約解除・全UI表示・DEBUGバッジ）
+- [x] `ExecutionResult.executedType` — 直前に実行した命令タイプをUIに通知
 
 ---
 
@@ -64,7 +72,6 @@
 - [ ] エラー表示 タイプ1（構文エラー：赤波線・行アイコン・提案文）
 - [ ] エラー表示 タイプ2（論理エラー：実際値vs期待値の並列表示）
 - [ ] ステップ実行の差分ハイライト（変化前→変化後の表示）
-- [ ] メモリビュー（`src/components/cpu/MemoryView.vue`）
 - [ ] ノートUI インタールード（`src/components/note/NoteInterlude.vue`）
 - [ ] ヒント表示（段階的）
 - [ ] 進捗保存（`src/stores/progress.ts` + pinia-plugin-persistedstate）
@@ -84,3 +91,5 @@
 |---|---|
 | Phase 1完了 | `[addr]` 直接アドレス記法（`[0x10]`形式）はレキサー未対応。Phase 3 の LOAD/STORE 実装時に追加が必要 |
 | Phase 1完了 | `ARCH0_SPEC.md` の「PC = メモリアドレス」は実装では「命令インデックス」に変更。仕様書に反映済み |
+| Phase 2完了 | ユーザーデータ領域を 0x00〜0x3F（64アドレス）に定義。MemoryView はこの範囲のみ表示。LOAD/STORE はスタック領域含む全アドレス空間にアクセス可能（SP相対引数渡しに必要） |
+| Phase 2完了 | `--color-text-muted`（gray-300）をパネルタイトル用に追加。テキスト階層: text > text-muted > text-secondary > text-tertiary |

@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { Cpu } from '../core/cpu/cpu.ts'
-import type { CpuSnapshot, ExecutionResult, ParseError, InstructionType } from '../core/cpu/types.ts'
+import { useDebugMode } from '../composables/useDebugMode.ts'
+import type { CpuSnapshot, ExecutionResult, ParseError } from '../core/cpu/types.ts'
 import type { Stage, SuccessCondition } from '../core/stages/types.ts'
 
 function checkCondition(snapshot: CpuSnapshot, cond: SuccessCondition): boolean {
@@ -19,6 +20,7 @@ function checkCondition(snapshot: CpuSnapshot, cond: SuccessCondition): boolean 
 
 export const useCpuStore = defineStore('cpu', () => {
   const cpu = new Cpu()
+  const { isDebugMode } = useDebugMode()
 
   const snapshot = ref<CpuSnapshot>(cpu.snapshot)
   const parseErrors = ref<ParseError[]>([])
@@ -45,8 +47,7 @@ export const useCpuStore = defineStore('cpu', () => {
 
   function loadStage(stage: Stage, source = '') {
     currentStage.value = stage
-    // DEBUG: 命令制約を一時的に無効化
-    const allowed: InstructionType[] | undefined = undefined
+    const allowed = isDebugMode.value ? undefined : stage.unlockedInstructions
     cpu.load(source, allowed, stage.initialMemory)
     snapshot.value = cpu.snapshot
     parseErrors.value = cpu.errors
@@ -55,8 +56,7 @@ export const useCpuStore = defineStore('cpu', () => {
 
   function loadSource(source: string) {
     const stage = currentStage.value
-    // DEBUG: 命令制約を一時的に無効化
-    const allowed: InstructionType[] | undefined = undefined
+    const allowed = isDebugMode.value ? undefined : stage?.unlockedInstructions
     cpu.load(source, allowed, stage?.initialMemory)
     snapshot.value = cpu.snapshot
     parseErrors.value = cpu.errors

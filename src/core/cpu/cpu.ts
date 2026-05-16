@@ -244,6 +244,8 @@ export class Cpu {
       changedRegisters: diffRegisters(before, after),
       changedMemoryAddresses: diffMemory(before, after),
       changedFlags: diffFlags(before, after),
+      executedType: instr.type,
+      error: state.error,
     }
   }
 

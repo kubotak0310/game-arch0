@@ -54,7 +54,7 @@ const changedFlags = computed(() => new Set(cpuStore.lastResult?.changedFlags ??
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   margin: 0 0 8px;
 }
 .flag-list {
