@@ -1,0 +1,124 @@
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+import { useCpuStore } from '../../stores/cpu.ts'
+
+const cpuStore = useCpuStore()
+
+const REGISTERS = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5'] as const
+
+const highlighted = ref<Set<string>>(new Set())
+let highlightTimer: ReturnType<typeof setTimeout> | null = null
+
+watch(() => cpuStore.lastResult, result => {
+  if (!result || result.changedRegisters.length === 0) return
+  highlighted.value = new Set(result.changedRegisters)
+  if (highlightTimer) clearTimeout(highlightTimer)
+  highlightTimer = setTimeout(() => { highlighted.value = new Set() }, 1200)
+})
+
+function formatDec(v: number): string {
+  return String(v)
+}
+
+function formatHex(v: number): string {
+  return '0x' + v.toString(16).toUpperCase().padStart(4, '0')
+}
+
+const regValue = (name: string) =>
+  cpuStore.snapshot.registers[name as keyof typeof cpuStore.snapshot.registers] as number
+
+const isR0 = (name: string) => name === 'R0'
+const isZero = (name: string) => regValue(name) === 0
+</script>
+
+<template>
+  <div class="register-view">
+    <h3 class="section-title">レジスタ</h3>
+    <div class="register-list">
+      <div
+        v-for="name in REGISTERS"
+        :key="name"
+        class="register-row"
+        :class="{
+          'r0-row': isR0(name),
+          highlighted: highlighted.has(name),
+          unused: !isR0(name) && isZero(name),
+        }"
+      >
+        <span class="reg-name">{{ name }}</span>
+        <div class="reg-values">
+          <span class="reg-dec">{{ formatDec(regValue(name)) }}</span>
+          <span class="reg-hex">{{ formatHex(regValue(name)) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.register-view {
+  padding: 12px;
+}
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin: 0 0 8px;
+}
+.register-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.register-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+.register-row.r0-row {
+  opacity: 0.4;
+  border-left: 3px solid var(--color-border);
+}
+.register-row.unused {
+  opacity: 0.35;
+}
+.register-row.highlighted {
+  background: color-mix(in srgb, var(--color-accent-green) 15%, transparent);
+  border-color: var(--color-accent-green);
+  opacity: 1;
+}
+.reg-name {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-accent-blue);
+  width: 28px;
+  flex-shrink: 0;
+}
+.reg-values {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.reg-dec {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 14px;
+  color: var(--color-text);
+  min-width: 36px;
+  text-align: right;
+}
+.reg-hex {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  min-width: 52px;
+  text-align: right;
+}
+</style>

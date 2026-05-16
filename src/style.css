@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  /* ── Tailwind CSS gray スケール準拠パレット ── */
+
+  /* 背景系 */
+  --color-bg: #111827;          /* gray-900: ページ背景 */
+  --color-surface: #1f2937;     /* gray-800: パネル本体 */
+  --color-surface-2: #374151;   /* gray-700: パネルヘッダー・区切り */
+  --color-border: #374151;      /* gray-700: ボーダー */
+
+  /* テキスト */
+  --color-text: #f3f4f6;              /* gray-100: メインテキスト */
+  --color-text-secondary: #9ca3af;   /* gray-400: ラベル・補助テキスト */
+  --color-text-tertiary: #6b7280;    /* gray-500: 非アクティブ */
+
+  /* アクセント */
+  --color-accent-blue: #60a5fa;     /* blue-400: 関数呼び出し・リンク */
+  --color-accent-green: #4ade80;    /* green-400: 成功・戻り値 */
+  --color-accent-amber: #fef08a;    /* yellow-200: 数値変化ハイライト */
+  --color-accent-purple: #d8b4fe;   /* purple-300: アドレス値 */
+  --color-accent-coral: #fca5a5;    /* red-300: エラー */
+  --color-accent-teal: #34d399;     /* コメント (既存維持) */
+
+  /* 制御レジスタ (PC 等) */
+  --color-control-reg: #fef08a;     /* yellow-200 */
+
+  /* ボタンホバー */
+  --color-accent-green-dark: #16a34a;  /* green-600 */
+
+  /* CodeMirror テキスト選択ハイライト */
+  --color-selection: #3b4f6e;
+
+  /* gray-600: input / select / button */
+  --color-surface-3: #4b5563;
+
+  /* ノートUI (変更なし) */
+  --color-note-paper: #F7F3EA;
+  --color-note-line: #C8D8E8;
+  --color-note-margin: rgba(200, 60, 60, 0.28);
+  --color-note-ink: #1A3A6A;
+  --color-note-date: #8B6914;
+
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+#app {
+  min-height: 100svh;
+}

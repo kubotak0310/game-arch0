@@ -1,0 +1,32 @@
+import type { InstructionType, AnyRegisterName, Flags, Registers } from '../cpu/types.ts'
+
+export interface I18nText {
+  ja: string
+  en: string
+}
+
+export type SuccessCondition =
+  | { type: 'register'; target: AnyRegisterName; expected: number }
+  | { type: 'memory'; address: number; expected: number }
+  | { type: 'flag'; flag: keyof Flags; expected: boolean }
+
+export interface OptimizationGoal {
+  type: 'instruction_count' | 'cycle_count' | 'memory_usage'
+  threshold: number
+  label: I18nText
+}
+
+export interface Stage {
+  id: string
+  chapter: number
+  order: number
+  title: I18nText
+
+  initialRegisters?: Partial<Omit<Registers, 'R0'>>
+  initialMemory?: Array<{ address: number; value: number }>
+
+  successConditions: SuccessCondition[]
+  unlockedInstructions?: InstructionType[]
+  optimizationGoals?: OptimizationGoal[]
+  hints: I18nText[]
+}
