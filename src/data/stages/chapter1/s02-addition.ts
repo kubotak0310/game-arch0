@@ -18,16 +18,19 @@ export const stage2: Stage = {
 
   hints: [
     {
+      kind: 'hint',
       ja: 'まず MOV で R1 と R2 に値をセットしましょう。\nADD は数値を直接扱えず、レジスタ同士の足し算です。\n例: MOV R1, 3',
       en: 'First, use MOV to set values in R1 and R2.\nADD works only with registers, not immediate values.\nExample: MOV R1, 3',
     },
     {
+      kind: 'hint',
       ja: 'ADD命令で2つのレジスタを足せます。\n書き方: ADD 結果, 値1, 値2\n例: ADD R3, R1, R2 → R3 = R1 + R2',
       en: 'Use ADD to sum two registers.\nSyntax: ADD dst, src1, src2\nExample: ADD R3, R1, R2 → R3 = R1 + R2',
     },
     {
-      ja: '答え:\nMOV R1, 3\nMOV R2, 4\nADD R3, R1, R2',
-      en: 'Answer:\nMOV R1, 3\nMOV R2, 4\nADD R3, R1, R2',
+      kind: 'answer',
+      ja: 'MOV R1, 3\nMOV R2, 4\nADD R3, R1, R2',
+      en: 'MOV R1, 3\nMOV R2, 4\nADD R3, R1, R2',
     },
   ],
 }

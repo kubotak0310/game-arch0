@@ -19,16 +19,19 @@ export const stage5: Stage = {
 
   hints: [
     {
+      kind: 'hint',
       ja: 'C言語で書くとこうなります：\n\nint temp = r1;\nr1 = r2;\nr2 = temp;\n\n2つの変数を直接入れ替えることはできないので、\n一時的な変数 temp が必要です。\nアセンブラでは R3 を temp として使いましょう。',
       en: 'In C, this looks like:\n\nint temp = r1;\nr1 = r2;\nr2 = temp;\n\nYou cannot swap two variables directly,\nso a temporary variable temp is needed.\nUse R3 as temp in assembly.',
     },
     {
+      kind: 'hint',
       ja: 'C言語との対応はこうなります：\n\n// C言語        // アセンブラ\ntemp = r1;  →  MOV R3, R1\nr1 = r2;    →  MOV R1, R2\nr2 = temp;  →  MOV R2, R3',
       en: 'Here is the C-to-assembly mapping:\n\n// C            // Assembly\ntemp = r1;  →  MOV R3, R1\nr1 = r2;    →  MOV R1, R2\nr2 = temp;  →  MOV R2, R3',
     },
     {
-      ja: '答え:\nMOV R1, 5\nMOV R2, 8\nMOV R3, R1\nMOV R1, R2\nMOV R2, R3',
-      en: 'Answer:\nMOV R1, 5\nMOV R2, 8\nMOV R3, R1\nMOV R1, R2\nMOV R2, R3',
+      kind: 'answer',
+      ja: 'MOV R1, 5\nMOV R2, 8\nMOV R3, R1\nMOV R1, R2\nMOV R2, R3',
+      en: 'MOV R1, 5\nMOV R2, 8\nMOV R3, R1\nMOV R1, R2\nMOV R2, R3',
     },
   ],
 }

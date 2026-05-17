@@ -56,14 +56,6 @@ const lrChanged = computed(
   padding: 10px 12px;
   border-top: 1px solid var(--color-border);
 }
-.section-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin: 0 0 8px;
-}
 .control-list {
   display: flex;
   flex-direction: column;

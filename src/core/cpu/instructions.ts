@@ -1,4 +1,4 @@
-import type { Instruction, Registers, Flags, AnyRegisterName, RuntimeError } from './types.ts'
+import type { Instruction, Operand, Registers, Flags, AnyRegisterName, RuntimeError } from './types.ts'
 import type { Memory } from './memory.ts'
 
 export const USER_MEM_MAX = 0x3F
@@ -26,6 +26,14 @@ function readRegister(state: MutableCpuState, name: AnyRegisterName): number {
     case 'SP': return state.sp
     case 'PC': return state.pc
   }
+}
+
+// ADD/SUB/CMP 等の演算系第2/3オペランド（register または immediate）から値を取り出す。
+// パーサーが型を保証しているが、型ガードで安全に分岐する。
+function readRegOrImm(state: MutableCpuState, op: Operand): number {
+  if (op.type === 'immediate') return op.value
+  if (op.type === 'register') return readRegister(state, op.name)
+  return 0
 }
 
 export function setRegister(state: MutableCpuState, name: AnyRegisterName, value: number): void {
@@ -90,7 +98,7 @@ export function executeInstruction(instr: Instruction, state: MutableCpuState): 
       const [dst, op1, op2] = instr.operands
       if (dst.type !== 'register' || op1.type !== 'register') break
       const a = readRegister(state, op1.name)
-      const b = op2.type === 'immediate' ? op2.value : readRegister(state, op2.name as AnyRegisterName)
+      const b = readRegOrImm(state, op2)
       const full = a + b
       const result = full & 0xFFFF
       setRegister(state, dst.name, result)
@@ -102,7 +110,7 @@ export function executeInstruction(instr: Instruction, state: MutableCpuState): 
       const [dst, op1, op2] = instr.operands
       if (dst.type !== 'register' || op1.type !== 'register') break
       const a = readRegister(state, op1.name)
-      const b = op2.type === 'immediate' ? op2.value : readRegister(state, op2.name as AnyRegisterName)
+      const b = readRegOrImm(state, op2)
       const result = (a - b) & 0xFFFF
       setRegister(state, dst.name, result)
       updateFlagsSub(state, a, b, result)
@@ -133,7 +141,7 @@ export function executeInstruction(instr: Instruction, state: MutableCpuState): 
       const [op1, op2] = instr.operands
       if (op1.type !== 'register') break
       const a = readRegister(state, op1.name)
-      const b = op2.type === 'immediate' ? op2.value : readRegister(state, op2.name as AnyRegisterName)
+      const b = readRegOrImm(state, op2)
       const result = (a - b) & 0xFFFF
       updateFlagsSub(state, a, b, result)
       break

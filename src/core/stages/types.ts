@@ -5,6 +5,10 @@ export interface I18nText {
   en: string
 }
 
+export interface Hint extends I18nText {
+  kind: 'hint' | 'answer'
+}
+
 export type SuccessCondition =
   | { type: 'register'; target: AnyRegisterName; expected: number }
   | { type: 'memory'; address: number; expected: number }
@@ -31,5 +35,5 @@ export interface Stage {
   successConditions: SuccessCondition[]
   unlockedInstructions?: InstructionType[]
   optimizationGoals?: OptimizationGoal[]
-  hints: I18nText[]
+  hints: Hint[]
 }

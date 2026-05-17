@@ -20,16 +20,19 @@ export const stage1: Stage = {
 
   hints: [
     {
+      kind: 'hint',
       ja: 'MOV命令を使います。\n例: MOV R1, 2',
       en: 'Use the MOV instruction.\nExample: MOV R1, 2',
     },
     {
+      kind: 'hint',
       ja: 'R2にも同じパターンで書いてみましょう。\nMOV R2, 3',
       en: 'Write the same pattern for R2.\nMOV R2, 3',
     },
     {
-      ja: '答え:\nMOV R1, 2\nMOV R2, 3',
-      en: 'Answer:\nMOV R1, 2\nMOV R2, 3',
+      kind: 'answer',
+      ja: 'MOV R1, 2\nMOV R2, 3',
+      en: 'MOV R1, 2\nMOV R2, 3',
     },
   ],
 }

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import type { I18nText } from '../../core/stages/types.ts'
+import { ref, watch, computed } from 'vue'
+import type { Hint } from '../../core/stages/types.ts'
 
 const props = defineProps<{
-  hints: I18nText[]
+  hints: Hint[]
   stageId: string
 }>()
 
@@ -16,6 +16,19 @@ watch(() => props.stageId, () => {
 function revealNext() {
   if (revealed.value < props.hints.length) revealed.value++
 }
+
+function hintNumber(index: number): number {
+  // index 番目までの 'hint' kind の数を返す
+  return props.hints.slice(0, index + 1).filter(h => h.kind === 'hint').length
+}
+
+// 次に開示するアイテムのラベル
+const nextRevealLabel = computed(() => {
+  const next = props.hints[revealed.value]
+  if (!next) return ''
+  if (next.kind === 'answer') return '答えを見る'
+  return `ヒント ${hintNumber(revealed.value)} を見る`
+})
 </script>
 
 <template>
@@ -28,7 +41,7 @@ function revealNext() {
     <div class="hint-body">
       <div v-if="revealed === 0" class="hint-empty">
         <p class="hint-empty-text">詰まったときは少しずつヒントを確認しましょう。</p>
-        <button class="hint-btn" @click="revealNext">ヒント 1 を見る</button>
+        <button class="hint-btn" @click="revealNext">{{ nextRevealLabel }}</button>
       </div>
 
       <template v-else>
@@ -36,10 +49,10 @@ function revealNext() {
           v-for="(hint, i) in hints.slice(0, revealed)"
           :key="i"
           class="hint-card"
-          :class="{ answer: i === hints.length - 1 }"
+          :class="{ answer: hint.kind === 'answer' }"
         >
           <div class="hint-card-label">
-            <span v-if="i < hints.length - 1">ヒント {{ i + 1 }}</span>
+            <span v-if="hint.kind === 'hint'">ヒント {{ hintNumber(i) }}</span>
             <span v-else class="answer-label">答え</span>
           </div>
           <pre class="hint-text">{{ hint.ja }}</pre>
@@ -50,7 +63,7 @@ function revealNext() {
           class="hint-btn"
           @click="revealNext"
         >
-          ヒント {{ revealed + 1 }} を見る
+          {{ nextRevealLabel }}
         </button>
       </template>
     </div>
@@ -59,9 +72,10 @@ function revealNext() {
 
 <style scoped>
 .hint-panel {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -72,7 +86,6 @@ function revealNext() {
   padding: 6px 12px;
   background: var(--color-surface-2);
   border-bottom: 1px solid var(--color-border);
-  flex-shrink: 0;
 }
 
 .hint-title {
@@ -89,7 +102,7 @@ function revealNext() {
 }
 
 .hint-body {
-  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 12px;
   display: flex;
@@ -118,6 +131,7 @@ function revealNext() {
   border: 1px solid color-mix(in srgb, var(--color-accent-blue) 20%, transparent);
   border-radius: 8px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .hint-card.answer {
@@ -165,6 +179,7 @@ function revealNext() {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
 }
 
 .hint-btn:hover {

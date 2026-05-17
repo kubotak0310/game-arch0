@@ -75,11 +75,6 @@ const isEmpty = computed(() => stackEntries.value.length === 0)
   flex-shrink: 0;
 }
 .section-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
   margin: 0;
 }
 .sp-label {

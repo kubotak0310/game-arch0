@@ -90,11 +90,6 @@ function toHex2addr(n: number): string {
   flex-shrink: 0;
 }
 .section-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
   margin: 0;
 }
 .range-label {

@@ -6,11 +6,8 @@ import { useCpuStore } from '../../stores/cpu.ts'
 const execStore = useExecutionStore()
 const cpuStore = useCpuStore()
 
-const emit = defineEmits<{ run: []; reset: [] }>()
-
 function handleRun() {
   execStore.runAll()
-  emit('run')
 }
 function handleStep() {
   execStore.stepForward()
@@ -20,7 +17,6 @@ function handleBack() {
 }
 function handleReset() {
   execStore.reset()
-  emit('reset')
 }
 
 function handleKeydown(e: KeyboardEvent) {

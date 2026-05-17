@@ -53,14 +53,6 @@ const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RE
 .register-view {
   padding: 12px;
 }
-.section-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin: 0 0 8px;
-}
 .register-list {
   display: flex;
   flex-direction: column;

@@ -19,16 +19,19 @@ export const stage4: Stage = {
 
   hints: [
     {
+      kind: 'hint',
       ja: 'SUB命令を使います。\n書き方: SUB 結果, 値1, 値2\nこれで 結果 = 値1 - 値2 になります',
       en: 'Use the SUB instruction.\nSyntax: SUB dst, src1, src2\nThis sets dst = src1 - src2',
     },
     {
+      kind: 'hint',
       ja: '書き先と読み元に同じレジスタを使えます（a = a - 4 と同じ考え方）。\nSUB R1, R1, R2 → R1 = R1 - R2\nこれで R1 の値を直接更新できます。',
       en: 'The destination and source can be the same register (like a = a - 4).\nSUB R1, R1, R2 → R1 = R1 - R2\nThis updates R1 directly.',
     },
     {
-      ja: '答え:\nMOV R1, 10\nMOV R2, 4\nSUB R1, R1, R2',
-      en: 'Answer:\nMOV R1, 10\nMOV R2, 4\nSUB R1, R1, R2',
+      kind: 'answer',
+      ja: 'MOV R1, 10\nMOV R2, 4\nSUB R1, R1, R2',
+      en: 'MOV R1, 10\nMOV R2, 4\nSUB R1, R1, R2',
     },
   ],
 }

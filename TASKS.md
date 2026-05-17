@@ -86,6 +86,29 @@
 - [x] レジスタ/フラグのハイライト統一 — タイムアウト消去を廃止し、次ステップまで緑を保持
 - [x] 条件付き分岐バグ修正 — BNE等がジャンプしない場合にPCが進まない無限ループを修正（`cpu.ts`）
 
+### リファクタリング（ストーリー実装前の地ならし）
+
+- [x] **データ層の抽出**
+  - [x] `INSTRUCTION_INFO` を `src/data/instructions.ts` へ抽出（StageView から24行削減）
+  - [x] `Hint` 型を `{ kind: 'hint' \| 'answer', ja, en }` に明示化（暗黙のラスト要素＝答え規約を撤廃）
+- [x] **テスト強化** — 26件追加（58→84件）
+  - [x] 条件付き分岐 PC インクリメント回帰テスト
+  - [x] `instructionsUsed` 追跡・巻き戻し復元
+  - [x] LOAD/STORE/CALL/RET/PUSH/POP/SHL/SHR/AND/OR/XOR/NOT
+  - [x] `initialRegisters` / `initialMemory` の動作
+- [x] **型安全性** — `instructions.ts` の `as AnyRegisterName` キャストを `readRegOrImm()` ヘルパーで型ガードに置換
+- [x] **UI 責務分離** — StageView を 804行 → 240行に縮小
+  - [x] `StageHeader.vue` — ヘッダー2行（章タイトル・バッジ・課題文・使用すべき命令）
+  - [x] `TaskPanel.vue` — クリア条件 + エラーリスト
+  - [x] `RightTabs.vue` — メモリ・スタック / ヒント のタブ切り替え
+- [x] **共通CSS** — `.section-title` を `style.css` に抽出（CPU パネル5箇所の重複削除）
+- [x] **デッドコード削除** — 未使用 emit、未使用 locales（vue-i18n 依存削除）、canGoPrev の死コード
+
+リファクタの方針判断：
+- i18n の全面適用は当面スコープ外（日本語コミュニティ向けに集中）
+- `parser.ts` の switch 文整理は保留（動作しており触ると壊しやすい）
+- エディタ補完候補は全命令常時表示（学習者の発見を妨げないため、ステージ制約はパーサーで担保）
+
 ---
 
 ## Phase 4 📋 — 第2〜終章の実装
