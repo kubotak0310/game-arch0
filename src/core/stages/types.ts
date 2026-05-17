@@ -9,6 +9,7 @@ export type SuccessCondition =
   | { type: 'register'; target: AnyRegisterName; expected: number }
   | { type: 'memory'; address: number; expected: number }
   | { type: 'flag'; flag: keyof Flags; expected: boolean }
+  | { type: 'instruction_used'; op: InstructionType }
 
 export interface OptimizationGoal {
   type: 'instruction_count' | 'cycle_count' | 'memory_usage'
@@ -21,9 +22,11 @@ export interface Stage {
   chapter: number
   order: number
   title: I18nText
+  objective: I18nText
 
   initialRegisters?: Partial<Omit<Registers, 'R0'>>
   initialMemory?: Array<{ address: number; value: number }>
+  initialSource?: string
 
   successConditions: SuccessCondition[]
   unlockedInstructions?: InstructionType[]

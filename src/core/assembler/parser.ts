@@ -114,8 +114,8 @@ class LineParser {
         line: lineNum,
         column: col,
         message: {
-          ja: 'カンマが必要です。例: MOV R1, #2',
-          en: 'A comma is required. Example: MOV R1, #2',
+          ja: 'カンマが必要です。例: MOV R1, 2',
+          en: 'A comma is required. Example: MOV R1, 2',
         },
       })
       return false
@@ -170,7 +170,7 @@ class LineParser {
       if (this.peek()?.kind === 'PLUS') {
         this.advance() // '+'
         const offsetTok = this.peek()
-        if (!offsetTok || (offsetTok.kind !== 'IMMEDIATE' && offsetTok.kind !== 'NUMBER')) {
+        if (!offsetTok || offsetTok.kind !== 'IMMEDIATE') {
           this.errors.push({
             line: lineNum,
             column: offsetTok?.column ?? 0,
@@ -215,7 +215,7 @@ class LineParser {
       return { type: 'label', name: t.value }
     }
 
-    // #なし即値（数字のみ）の検出は lexer が LABEL_REF 扱いするので、ここでは来ない
+    // 数値は lexer が IMMEDIATE として処理するので、ここには来ない
     return null
   }
 
@@ -295,13 +295,13 @@ function parseOperands(
       return true
 
     case 'MOV': {
-      // MOV Rd, Rs  OR  MOV Rd, #imm
+      // MOV Rd, Rs  OR  MOV Rd, imm
       const rd = lp.parseOperand(lineNum)
       if (!rd || rd.type !== 'register') {
         errors.push({
           line: lineNum, message: {
-            ja: `MOV の第1オペランドにレジスタが必要です。例: MOV R1, #2`,
-            en: `MOV requires a register as the first operand. Example: MOV R1, #2`,
+            ja: `MOV の第1オペランドにレジスタが必要です。例: MOV R1, 2`,
+            en: `MOV requires a register as the first operand. Example: MOV R1, 2`,
           },
         })
         return false
@@ -311,8 +311,8 @@ function parseOperands(
       if (!src) {
         errors.push({
           line: lineNum, message: {
-            ja: `MOV の第2オペランドにレジスタまたは即値(#)が必要です。例: MOV R1, #2`,
-            en: `MOV requires a register or immediate (#) as the second operand. Example: MOV R1, #2`,
+            ja: `MOV の第2オペランドにレジスタまたは即値が必要です。例: MOV R1, 2`,
+            en: `MOV requires a register or immediate as the second operand. Example: MOV R1, 2`,
           },
         })
         return false
@@ -320,8 +320,8 @@ function parseOperands(
       if (src.type !== 'register' && src.type !== 'immediate') {
         errors.push({
           line: lineNum, message: {
-            ja: `MOV の第2オペランドはレジスタか即値(#)である必要があります。`,
-            en: `MOV's second operand must be a register or immediate (#).`,
+            ja: `MOV の第2オペランドはレジスタか即値である必要があります。`,
+            en: `MOV's second operand must be a register or immediate.`,
           },
         })
         return false
@@ -332,7 +332,7 @@ function parseOperands(
 
     case 'ADD':
     case 'SUB': {
-      // OP Rd, Rs1, Rs2  OR  OP Rd, Rs, #imm
+      // OP Rd, Rs1, Rs2  OR  OP Rd, Rs, imm
       const rd = lp.parseOperand(lineNum)
       if (!rd || rd.type !== 'register') {
         errors.push({
@@ -359,8 +359,8 @@ function parseOperands(
       if (!rs2 || (rs2.type !== 'register' && rs2.type !== 'immediate')) {
         errors.push({
           line: lineNum, message: {
-            ja: `${mnemonic} の第3オペランドにレジスタまたは即値(#)が必要です。`,
-            en: `${mnemonic} requires a register or immediate (#) as the third operand.`,
+            ja: `${mnemonic} の第3オペランドにレジスタまたは即値が必要です。`,
+            en: `${mnemonic} requires a register or immediate as the third operand.`,
           },
         })
         return false
@@ -423,7 +423,7 @@ function parseOperands(
     }
 
     case 'CMP': {
-      // CMP Rs1, Rs2  OR  CMP Rs, #imm
+      // CMP Rs1, Rs2  OR  CMP Rs, imm
       const rs1 = lp.parseOperand(lineNum)
       if (!rs1 || rs1.type !== 'register') {
         errors.push({
@@ -439,8 +439,8 @@ function parseOperands(
       if (!rs2 || (rs2.type !== 'register' && rs2.type !== 'immediate')) {
         errors.push({
           line: lineNum, message: {
-            ja: `CMP の第2オペランドにレジスタまたは即値(#)が必要です。`,
-            en: `CMP requires a register or immediate (#) as the second operand.`,
+            ja: `CMP の第2オペランドにレジスタまたは即値が必要です。`,
+            en: `CMP requires a register or immediate as the second operand.`,
           },
         })
         return false
@@ -557,7 +557,7 @@ function parseOperands(
       if (!lp.expectComma(lineNum)) return false
       const n = lp.parseOperand(lineNum)
       if (!n || n.type !== 'immediate') {
-        errors.push({ line: lineNum, message: { ja: `${mnemonic} の第3オペランドに即値(#n)が必要です。例: ${mnemonic} R1, R2, #3`, en: `${mnemonic} requires an immediate shift amount (#n) as third operand.` } })
+        errors.push({ line: lineNum, message: { ja: `${mnemonic} の第3オペランドに即値が必要です。例: ${mnemonic} R1, R2, 3`, en: `${mnemonic} requires an immediate shift amount as third operand.` } })
         return false
       }
       operands.push(rd, rs, n)

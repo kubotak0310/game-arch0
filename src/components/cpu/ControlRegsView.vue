@@ -61,7 +61,7 @@ const lrChanged = computed(
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   margin: 0 0 8px;
 }
 .control-list {
@@ -96,12 +96,12 @@ const lrChanged = computed(
 }
 .ctrl-value {
   font-family: ui-monospace, Consolas, monospace;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text);
   flex: 1;
 }
 .ctrl-desc {
   font-size: 10px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 </style>

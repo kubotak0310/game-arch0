@@ -5,37 +5,43 @@ import { parse } from '../../src/core/assembler/parser.ts'
 describe('Lexer', () => {
   describe('基本トークン化', () => {
     it('ニーモニックを MNEMONIC として認識する', () => {
-      const { tokens } = tokenize('MOV R1, #2')
+      const { tokens } = tokenize('MOV R1, 2')
       expect(tokens[0].kind).toBe('MNEMONIC')
       expect(tokens[0].value).toBe('MOV')
     })
 
     it('レジスタを REGISTER として認識する', () => {
-      const { tokens } = tokenize('MOV R1, #2')
+      const { tokens } = tokenize('MOV R1, 2')
       expect(tokens[1].kind).toBe('REGISTER')
       expect(tokens[1].value).toBe('R1')
     })
 
-    it('即値(#数値)を IMMEDIATE として認識する', () => {
-      const { tokens } = tokenize('MOV R1, #5')
+    it('即値(数値)を IMMEDIATE として認識する', () => {
+      const { tokens } = tokenize('MOV R1, 5')
       const imm = tokens.find(t => t.kind === 'IMMEDIATE')
       expect(imm?.value).toBe('5')
     })
 
-    it('16進即値 #0x10 を正しくパースする', () => {
-      const { tokens } = tokenize('MOV R1, #0x10')
+    it('16進即値 0x10 を正しくパースする', () => {
+      const { tokens } = tokenize('MOV R1, 0x10')
       const imm = tokens.find(t => t.kind === 'IMMEDIATE')
       expect(imm?.value).toBe('16')
     })
 
-    it('2進即値 #0b101 を正しくパースする', () => {
-      const { tokens } = tokenize('MOV R1, #0b101')
+    it('2進即値 0b101 を正しくパースする', () => {
+      const { tokens } = tokenize('MOV R1, 0b101')
       const imm = tokens.find(t => t.kind === 'IMMEDIATE')
       expect(imm?.value).toBe('5')
     })
 
+    it('負の即値 -3 を正しくパースする', () => {
+      const { tokens } = tokenize('MOV R1, -3')
+      const imm = tokens.find(t => t.kind === 'IMMEDIATE')
+      expect(imm?.value).toBe('-3')
+    })
+
     it('制御レジスタ LR, SP, PC を認識する', () => {
-      const { tokens: lrTokens } = tokenize('MOV LR, #0')
+      const { tokens: lrTokens } = tokenize('MOV LR, 0')
       expect(lrTokens[1].kind).toBe('REGISTER')
       expect(lrTokens[1].value).toBe('LR')
     })
@@ -53,12 +59,12 @@ describe('Lexer', () => {
     })
 
     it('カンマを COMMA として認識する', () => {
-      const { tokens } = tokenize('MOV R1, #2')
+      const { tokens } = tokenize('MOV R1, 2')
       expect(tokens[2].kind).toBe('COMMA')
     })
 
     it('コメント(;以降)を除去する', () => {
-      const { tokens } = tokenize('MOV R1, #2 ; これはコメント')
+      const { tokens } = tokenize('MOV R1, 2 ; これはコメント')
       const values = tokens.map(t => t.value)
       expect(values).not.toContain(';')
       expect(values).not.toContain('これはコメント')
@@ -70,7 +76,7 @@ describe('Lexer', () => {
     })
 
     it('行番号が正しく付与される', () => {
-      const { tokens } = tokenize('MOV R1, #2\nADD R3, R1, R2')
+      const { tokens } = tokenize('MOV R1, 2\nADD R3, R1, R2')
       const addToken = tokens.find(t => t.value === 'ADD')
       expect(addToken?.line).toBe(2)
     })
@@ -86,13 +92,13 @@ describe('Lexer', () => {
 
   describe('エラー検出', () => {
     it('全角文字を検出してエラーを返す（実行は継続）', () => {
-      const { errors } = tokenize('ＭＯＶ R1, #2')
+      const { errors } = tokenize('ＭＯＶ R1, 2')
       expect(errors.length).toBeGreaterThan(0)
       expect(errors[0].message.ja).toContain('全角文字')
     })
 
     it('エラーがあってもスキャンを継続する', () => {
-      const { tokens } = tokenize('MOV R1, #2\n@invalid\nHALT')
+      const { tokens } = tokenize('MOV R1, 2\n@invalid\nHALT')
       const halt = tokens.find(t => t.value === 'HALT')
       expect(halt).toBeDefined()
     })
@@ -101,8 +107,8 @@ describe('Lexer', () => {
 
 describe('Parser', () => {
   describe('基本命令パース', () => {
-    it('MOV Rd, #imm をパースする', () => {
-      const { tokens } = tokenize('MOV R1, #2')
+    it('MOV Rd, imm をパースする', () => {
+      const { tokens } = tokenize('MOV R1, 2')
       const { instructions, errors } = parse(tokens)
       expect(errors).toHaveLength(0)
       expect(instructions[0].type).toBe('MOV')
@@ -125,8 +131,8 @@ describe('Parser', () => {
       expect(instructions[0].operands).toHaveLength(3)
     })
 
-    it('ADD Rd, Rs, #imm をパースする', () => {
-      const { tokens } = tokenize('ADD R1, R1, #5')
+    it('ADD Rd, Rs, imm をパースする', () => {
+      const { tokens } = tokenize('ADD R1, R1, 5')
       const { instructions, errors } = parse(tokens)
       expect(errors).toHaveLength(0)
       expect(instructions[0].operands[2]).toEqual({ type: 'immediate', value: 5 })
@@ -141,7 +147,7 @@ describe('Parser', () => {
     })
 
     it('sourceLine が正しく設定される', () => {
-      const { tokens } = tokenize('MOV R1, #2\nHALT')
+      const { tokens } = tokenize('MOV R1, 2\nHALT')
       const { instructions } = parse(tokens)
       expect(instructions[0].sourceLine).toBe(1)
       expect(instructions[1].sourceLine).toBe(2)
@@ -150,13 +156,13 @@ describe('Parser', () => {
 
   describe('ラベル', () => {
     it('ラベル定義が labels Map に記録される（大文字で正規化）', () => {
-      const { tokens } = tokenize('loop:\nMOV R1, #0')
+      const { tokens } = tokenize('loop:\nMOV R1, 0')
       const { labels } = parse(tokens)
       expect(labels.get('LOOP')).toBe(0)
     })
 
     it('ラベル参照が命令インデックスに解決される', () => {
-      const src = 'MOV R1, #0\nloop:\nMOV R1, #1\nJMP loop'
+      const src = 'MOV R1, 0\nloop:\nMOV R1, 1\nJMP loop'
       const { tokens } = tokenize(src)
       const { instructions, errors } = parse(tokens)
       expect(errors).toHaveLength(0)
@@ -176,14 +182,14 @@ describe('Parser', () => {
 
   describe('エラーメッセージ', () => {
     it('タイポニーモニックの修正提案を出す（MOC → MOV）', () => {
-      const { tokens } = tokenize('MOC R1, #2')
+      const { tokens } = tokenize('MOC R1, 2')
       const { errors } = parse(tokens)
       expect(errors.length).toBeGreaterThan(0)
       expect(errors[0].suggestion?.ja).toContain('MOV')
     })
 
     it('カンマ忘れのエラーを検出する', () => {
-      const { tokens } = tokenize('MOV R1 #2')
+      const { tokens } = tokenize('MOV R1 2')
       const { errors } = parse(tokens)
       expect(errors.length).toBeGreaterThan(0)
       expect(errors[0].message.ja).toContain('カンマ')
@@ -197,7 +203,7 @@ describe('Parser', () => {
     })
 
     it('エラーメッセージには ja と en が両方ある', () => {
-      const { tokens } = tokenize('MOC R1, #2')
+      const { tokens } = tokenize('MOC R1, 2')
       const { errors } = parse(tokens)
       expect(errors[0].message.ja).toBeTruthy()
       expect(errors[0].message.en).toBeTruthy()

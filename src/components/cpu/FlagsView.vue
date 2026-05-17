@@ -30,9 +30,9 @@ const changedFlags = computed(() => new Set(cpuStore.lastResult?.changedFlags ??
           'flag-set': cpuStore.snapshot.flags[flag],
           'flag-changed': changedFlags.has(flag),
         }"
-        :title="FLAG_DESC[flag]"
       >
         <span class="flag-name">{{ flag }}</span>
+        <span class="flag-desc">({{ FLAG_DESC[flag] }})</span>
         <span class="flag-value">{{ cpuStore.snapshot.flags[flag] ? '1' : '0' }}</span>
       </div>
     </div>
@@ -59,23 +59,18 @@ const changedFlags = computed(() => new Set(cpuStore.lastResult?.changedFlags ??
 }
 .flag-list {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
 }
 .flag-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 6px 4px;
+  gap: 8px;
+  padding: 5px 10px;
   border-radius: 6px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   transition: background 0.15s, border-color 0.15s;
-}
-.flag-item.flag-set {
-  background: color-mix(in srgb, var(--color-accent-purple) 15%, transparent);
-  border-color: var(--color-accent-purple);
 }
 .flag-item.flag-changed {
   background: color-mix(in srgb, var(--color-accent-green) 15%, transparent);
@@ -83,19 +78,30 @@ const changedFlags = computed(() => new Set(cpuStore.lastResult?.changedFlags ??
 }
 .flag-name {
   font-family: ui-monospace, Consolas, monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--color-text-tertiary);
-  letter-spacing: 0.05em;
+  width: 14px;
+  flex-shrink: 0;
+}
+.flag-desc {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .flag-value {
   font-family: ui-monospace, Consolas, monospace;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
 }
 .flag-item.flag-set .flag-value {
-  color: var(--color-accent-purple);
+  color: var(--color-text);
 }
 .flag-item.flag-changed .flag-value {
   color: var(--color-accent-teal);

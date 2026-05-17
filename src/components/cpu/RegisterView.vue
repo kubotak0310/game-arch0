@@ -1,20 +1,12 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { computed } from 'vue'
 import { useCpuStore } from '../../stores/cpu.ts'
 
 const cpuStore = useCpuStore()
 
 const REGISTERS = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5'] as const
 
-const highlighted = ref<Set<string>>(new Set())
-let highlightTimer: ReturnType<typeof setTimeout> | null = null
-
-watch(() => cpuStore.lastResult, result => {
-  if (!result || result.changedRegisters.length === 0) return
-  highlighted.value = new Set(result.changedRegisters)
-  if (highlightTimer) clearTimeout(highlightTimer)
-  highlightTimer = setTimeout(() => { highlighted.value = new Set() }, 1200)
-})
+const highlighted = computed(() => new Set(cpuStore.lastResult?.changedRegisters ?? []))
 
 function formatDec(v: number): string {
   return String(v)
@@ -78,7 +70,7 @@ const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RE
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 10px;
+  padding: 3px 10px;
   border-radius: 6px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -121,15 +113,15 @@ const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RE
 }
 .reg-dec {
   font-family: ui-monospace, Consolas, monospace;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--color-text);
   min-width: 36px;
   text-align: right;
 }
 .reg-hex {
   font-family: ui-monospace, Consolas, monospace;
-  font-size: 11px;
-  color: var(--color-text-tertiary);
+  font-size: 12px;
+  color: var(--color-text-secondary);
   min-width: 52px;
   text-align: right;
 }

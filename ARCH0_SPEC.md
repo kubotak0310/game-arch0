@@ -94,7 +94,7 @@ PCは **命令インデックス（0始まり）** を保持する。メモリ�
 
 ```
 MOV  Rd, Rs        ; Rdに Rsの値をコピー
-MOV  Rd, #imm      ; Rdに即値immを代入
+MOV  Rd, imm       ; Rdに即値immを代入
 LOAD  Rd, [addr]   ; メモリアドレスaddrの値をRdに読み込む
 LOAD  Rd, [Rs]     ; Rsが示すアドレスの値をRdに読み込む
 LOAD  Rd, [Rs + n] ; Rs+nのアドレスの値をRdに読み込む
@@ -107,9 +107,9 @@ STORE Rd, [Rs + n] ; Rdの値をRs+nのアドレスに書き込む
 
 ```
 ADD  Rd, Rs1, Rs2  ; Rd = Rs1 + Rs2
-ADD  Rd, Rs, #imm  ; Rd = Rs + imm
+ADD  Rd, Rs, imm   ; Rd = Rs + imm
 SUB  Rd, Rs1, Rs2  ; Rd = Rs1 - Rs2
-SUB  Rd, Rs, #imm  ; Rd = Rs - imm
+SUB  Rd, Rs, imm   ; Rd = Rs - imm
 ```
 
 #### 論理演算（第4章で追加）
@@ -119,15 +119,15 @@ AND  Rd, Rs1, Rs2  ; Rd = Rs1 & Rs2
 OR   Rd, Rs1, Rs2  ; Rd = Rs1 | Rs2
 XOR  Rd, Rs1, Rs2  ; Rd = Rs1 ^ Rs2
 NOT  Rd, Rs        ; Rd = ~Rs
-SHL  Rd, Rs, #n    ; Rd = Rs << n（論理左シフト）
-SHR  Rd, Rs, #n    ; Rd = Rs >> n（論理右シフト）
+SHL  Rd, Rs, n     ; Rd = Rs << n（論理左シフト）
+SHR  Rd, Rs, n     ; Rd = Rs >> n（論理右シフト）
 ```
 
 #### 比較・分岐（第3章で追加）
 
 ```
 CMP  Rs1, Rs2      ; Rs1とRs2を比較してフラグを更新（結果は保存しない）
-CMP  Rs, #imm      ; Rsと即値を比較してフラグを更新
+CMP  Rs, imm       ; Rsと即値を比較してフラグを更新
 BEQ  label         ; Z=1なら labelへジャンプ
 BNE  label         ; Z=0なら labelへジャンプ
 BLT  label         ; N=1かつV=0 なら labelへジャンプ（符号付き）
@@ -174,8 +174,8 @@ HALT               ; プログラムの実行を停止
 
 ```asm
 ; 呼び出し元
-MOV  R1, #10       ; 第1引数
-MOV  R2, #20       ; 第2引数
+MOV  R1, 10        ; 第1引数
+MOV  R2, 20        ; 第2引数
 CALL add_r1_r2     ; 関数呼び出し（LR に戻りアドレスが入る）
 ; R1 に戻り値（30）が入っている
 HALT
@@ -196,7 +196,7 @@ outer:
   RET
 
 inner:
-  MOV  R1, #42
+  MOV  R1, 42
   RET
 ```
 
@@ -206,6 +206,38 @@ inner:
 - `PUSH Rs`：SP を 2 減らし、`memory[SP] = Rs`（SP はデータを指す）
 - `POP Rd`：`Rd = memory[SP]`、SP を 2 増やす
 - 初期 SP = `0xFFFE`（偶数。SP は常に偶数アドレスを保つ）
+
+#### フレームポインタ（FP）を持たない設計判断
+
+ARCH-0 にはフレームポインタ専用レジスタを設けない。理由は以下の通り。
+
+**SP は関数本体で動かない：**  
+関数 prologue で callee-saved レジスタの PUSH とローカル変数の確保（`SUB SP, SP, n`）をまとめて行い、その後 epilogue（`ADD SP, SP, n` + POP）まで SP を変えない。SP 相対オフセット（`[SP + 0]`, `[SP + 2]` …）はコンパイル時に静的に決まるため、FP がなくても一意に参照できる。
+
+```asm
+func:
+  PUSH LR           ; callee-saved をまとめて保存
+  PUSH R3
+  SUB  SP, SP, 4    ; ローカル変数2つをまとめて確保
+  ; ── 以降 SP は固定。[SP+0], [SP+2] のオフセットは常に同じ ──
+  STORE R1, [SP + 0]
+  STORE R2, [SP + 2]
+  ; CALL other_func しても、呼び出し先が SP を復元するので影響なし
+  ; ─────────────────────────────────────────────────────────────
+  ADD  SP, SP, 4    ; まとめて解放
+  POP  R3
+  POP  LR
+  RET
+```
+
+**CALL が SP を変えない（呼び出し元視点）：**  
+引数はレジスタ（R1, R2）で渡すため、CALL 命令自体は SP を変更しない。呼び出し先は RET 前に自分が使った SP を復元する義務を持つ。これにより関数本体で CALL を何度行っても SP は prologue 後の値を保つ。
+
+**FP が必要になる場面（ARCH-0 のステージには登場しない）：**  
+可変長配列（VLA: `int arr[n]`）や `alloca()` のような実行時動的スタック確保、および C++ 例外のスタック巻き戻しでは SP が関数本体で動くため FP が必要。ARCH-0 の演習ではこれらを扱わないため FP は不要と判断した。
+
+**現代 ARM/RISC-V との対応：**  
+GCC/Clang はリリースビルドでデフォルト `-fomit-frame-pointer`（FP 省略）を使用する。ARCH-0 の SP 固定ルールは現代コンパイラの実際の動作と一致しており、教育的に正確。
 
 ---
 
@@ -219,14 +251,10 @@ inner:
 2進数:   0b01111011   （第4章以降で使用）
 ```
 
-#### 即値マーカー
-
-即値には `#` を前置する：`#5`、`#0x10`
-
 #### メモリアクセス
 
 ```
-[0x10]        ; 直接アドレス（裸の数値リテラル、#なし）
+[0x10]        ; 直接アドレス（数値リテラル）
 [R1]          ; レジスタ間接
 [R1 + 4]      ; オフセット付き（Intel風、数式的に読める）
 ```
@@ -256,17 +284,17 @@ JMP loop_start     ; ラベルへの参照
 
 ```asm
 ; 配列の合計を計算する例
-MOV  R2, #0x10     ; 配列の先頭アドレス（ユーザーデータ領域 0x00〜0x3F 内）
-MOV  R3, #8        ; 要素数
-MOV  R1, #0        ; 合計の初期値
+MOV  R2, 0x10      ; 配列の先頭アドレス（ユーザーデータ領域 0x00〜0x3F 内）
+MOV  R3, 8         ; 要素数
+MOV  R1, 0         ; 合計の初期値
 
 loop:
   CMP  R3, R0      ; R3が0かチェック（R0は常に0）
   BEQ  end
   LOAD R4, [R2]    ; メモリから読み込み
   ADD  R1, R1, R4  ; 合計に加算
-  ADD  R2, R2, #1  ; アドレスを進める
-  SUB  R3, R3, #1  ; カウンタを減らす
+  ADD  R2, R2, 1   ; アドレスを進める
+  SUB  R3, R3, 1   ; カウンタを減らす
   JMP  loop
 
 end:
@@ -452,6 +480,8 @@ export interface Stage {
   title: I18nText
 
   // 初期CPU状態（省略時はゼロクリア）
+  // NOTE: initialRegisters は実装済みだが、現フェーズのステージでは未使用。
+  //       ステージデバッグが進んだところで「残すか否か」を判断すること。
   initialRegisters?: Partial<Omit<Registers, 'R0'>>
   initialMemory?: Array<{ address: number; value: number }>
 
@@ -740,16 +770,16 @@ const stage1: Stage = {
 
   hints: [
     {
-      ja: 'MOV命令を使います。\n例: MOV R1, #2',
-      en: 'Use the MOV instruction.\nExample: MOV R1, #2'
+      ja: 'MOV命令を使います。\n例: MOV R1, 2',
+      en: 'Use the MOV instruction.\nExample: MOV R1, 2'
     },
     {
-      ja: 'R2にも同じパターンで書いてみましょう。\nMOV R2, #3',
-      en: 'Write the same pattern for R2.\nMOV R2, #3'
+      ja: 'R2にも同じパターンで書いてみましょう。\nMOV R2, 3',
+      en: 'Write the same pattern for R2.\nMOV R2, 3'
     },
     {
-      ja: '答え:\nMOV R1, #2\nMOV R2, #3',
-      en: 'Answer:\nMOV R1, #2\nMOV R2, #3'
+      ja: '答え:\nMOV R1, 2\nMOV R2, 3',
+      en: 'Answer:\nMOV R1, 2\nMOV R2, 3'
     },
   ],
 }
@@ -758,20 +788,19 @@ const stage1: Stage = {
 ### 想定する正解コード
 
 ```asm
-MOV R1, #2
-MOV R2, #3
+MOV R1, 2
+MOV R2, 3
 ```
 
 ### 想定する失敗パターン（エラーメッセージ設計）
 
 | ケース | コード例 | メッセージ（日本語） |
 |---|---|---|
-| 命令名typo | `MOC R1, #2` | 「MOC は認識できません。MOV のことですか?」 |
-| カンマ忘れ | `MOV R1 #2` | 「レジスタと値の間にカンマが必要です。例: MOV R1, #2」 |
-| #忘れ | `MOV R1, 2` | 「即値には # を付けてください。例: MOV R1, #2」 |
-| 全角文字 | `ＭＯＶ R1, #2` | 「全角文字が含まれています。IMEがONになっていませんか?」 |
-| 値が違う | `MOV R1, #5` | R1の実際値と期待値(2)を並列表示 |
-| 片方だけ | `MOV R1, #2`のみ | R2が0のまま、期待値(3)を表示 |
+| 命令名typo | `MOC R1, 2` | 「MOC は認識できません。MOV のことですか?」 |
+| カンマ忘れ | `MOV R1 2` | 「レジスタと値の間にカンマが必要です。例: MOV R1, 2」 |
+| 全角文字 | `ＭＯＶ R1, 2` | 「全角文字が含まれています。IMEがONになっていませんか?」 |
+| 値が違う | `MOV R1, 5` | R1の実際値と期待値(2)を並列表示 |
+| 片方だけ | `MOV R1, 2` のみ | R2が0のまま、期待値(3)を表示 |
 
 ---
 
@@ -797,20 +826,20 @@ MOV R2, #3
 
 ```typescript
 // テスト例
-it('MOV R1, #2 でR1に2が入る', () => {
-  const result = execute('MOV R1, #2')
+it('MOV R1, 2 でR1に2が入る', () => {
+  const result = execute('MOV R1, 2')
   expect(result.snapshot.registers.R1).toBe(2)
 })
 
 it('R0への書き込みは無視される', () => {
-  const result = execute('MOV R0, #5')
+  const result = execute('MOV R0, 5')
   expect(result.snapshot.registers.R0).toBe(0)
 })
 
 it('ADD R3, R1, R2 でR3にR1+R2が入る', () => {
   const result = execute(`
-    MOV R1, #2
-    MOV R2, #3
+    MOV R1, 2
+    MOV R2, 3
     ADD R3, R1, R2
   `)
   expect(result.snapshot.registers.R3).toBe(5)
@@ -818,7 +847,7 @@ it('ADD R3, R1, R2 でR3にR1+R2が入る', () => {
 
 it('ステップ実行で巻き戻しができる', () => {
   const cpu = new Cpu()
-  cpu.load('MOV R1, #2\nMOV R2, #3')
+  cpu.load('MOV R1, 2\nMOV R2, 3')
   cpu.stepForward()
   expect(cpu.snapshot.registers.R1).toBe(2)
   cpu.stepBackward()
@@ -843,7 +872,7 @@ it('ステップ実行で巻き戻しができる', () => {
 
 **完成基準：**
 
-ブラウザで `MOV R1, #2` と `MOV R2, #3` を書いて実行ボタンを押すと、レジスタ表示が変わりクリア判定が出る。
+ブラウザで `MOV R1, 2` と `MOV R2, 3` を書いて実行ボタンを押すと、レジスタ表示が変わりクリア判定が出る。
 
 ### フェーズ3：第1章の完成
 
@@ -922,8 +951,21 @@ PCはその配列インデックス（0, 1, 2, ...）を指す。
 `[0x10]` のような裸の数値リテラルを含む直接アドレス形式は未実装。
 
 第2章（LOAD/STORE 導入時）に以下の対応が必要：
-- レキサーに `#` なし数値リテラルのトークン化を追加（`LBRACKET` の直後に現れる数値）
-- パーサーの `parseOperand` で `memory_direct` オペランドとして処理するよう拡張
+- パーサーの `parseOperand` で `LBRACKET` 直後に `IMMEDIATE` トークンが来た場合を `memory_direct` オペランドとして処理するよう拡張（レキサーは数値を `IMMEDIATE` として出力済み）
+
+---
+
+### 条件付き分岐の PC インクリメント（実装上の注意）
+
+`BEQ`/`BNE`/`BLT` 等の条件付き分岐は `JUMP_INSTRUCTIONS` に含まれるため、通常の PC インクリメントがスキップされる。しかし条件不成立（ジャンプしない）場合、`executeInstruction` は `state.pc` を変更しない。これにより PC が分岐命令自身を指したままになり無限ループとなるバグがあった。
+
+`cpu.ts` の `stepForward()` で修正済み：実行前の PC（`pcBeforeExec`）を保持し、実行後に PC が変わっていなければインクリメントする。
+
+```typescript
+if (!this._halted && (!isJump || this._pc === pcBeforeExec)) {
+  this._pc++
+}
+```
 
 ---
 

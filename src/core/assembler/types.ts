@@ -1,8 +1,7 @@
 export type TokenKind =
   | 'MNEMONIC'
   | 'REGISTER'
-  | 'IMMEDIATE'   // # 付き即値: #5, #0x10
-  | 'NUMBER'      // 裸の数値: [R1 + 4] のオフセット部分
+  | 'IMMEDIATE'   // 数値リテラル: 5, 0x10, 0b101, -3
   | 'COMMA'
   | 'LBRACKET'
   | 'RBRACKET'

@@ -7,6 +7,7 @@ export interface CpuSnapshot {
   lr: number
   halted: boolean
   stepIndex: number
+  instructionsUsed: readonly InstructionType[]
 }
 
 export interface Registers {

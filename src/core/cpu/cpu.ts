@@ -78,6 +78,7 @@ export class Cpu {
 
   private _history: CpuSnapshot[]
   private _historyIndex: number
+  private _instructionsUsed: Set<InstructionType>
 
   constructor() {
     this._memory = new Memory()
@@ -89,9 +90,13 @@ export class Cpu {
     this._halted = false
     this._history = []
     this._historyIndex = -1
+    this._instructionsUsed = new Set()
   }
 
-  private resetState(initialMemory?: Array<{ address: number; value: number }>): void {
+  private resetState(
+    initialMemory?: Array<{ address: number; value: number }>,
+    initialRegisters?: Partial<Omit<Registers, 'R0'>>,
+  ): void {
     this._memory = new Memory()
     if (initialMemory) {
       for (const { address, value } of initialMemory) {
@@ -99,6 +104,13 @@ export class Cpu {
       }
     }
     this._registers = createInitialRegisters()
+    if (initialRegisters) {
+      const keys = Object.keys(initialRegisters) as Array<keyof typeof initialRegisters>
+      for (const key of keys) {
+        const value = initialRegisters[key]
+        if (value !== undefined) this._registers[key] = value & 0xFFFF
+      }
+    }
     this._flags = createInitialFlags()
     this._pc = 0
     this._sp = 0xFFFE
@@ -106,6 +118,7 @@ export class Cpu {
     this._halted = false
     this._history = []
     this._historyIndex = -1
+    this._instructionsUsed = new Set()
   }
 
   private captureSnapshot(stepIndex: number): CpuSnapshot {
@@ -118,6 +131,7 @@ export class Cpu {
       lr: this._lr,
       halted: this._halted,
       stepIndex,
+      instructionsUsed: [...this._instructionsUsed],
     }
   }
 
@@ -129,6 +143,7 @@ export class Cpu {
     this._sp = snap.sp
     this._lr = snap.lr
     this._halted = snap.halted
+    this._instructionsUsed = new Set(snap.instructionsUsed)
   }
 
   private pushHistory(snap: CpuSnapshot): void {
@@ -150,6 +165,7 @@ export class Cpu {
     source: string,
     allowedInstructions?: InstructionType[],
     initialMemory?: Array<{ address: number; value: number }>,
+    initialRegisters?: Partial<Omit<Registers, 'R0'>>,
   ): void {
     const { tokens, errors: lexErrors } = tokenize(source)
     const { instructions, labels, errors: parseErrors } = parse(tokens, allowedInstructions)
@@ -161,7 +177,7 @@ export class Cpu {
       ...parseErrors,
     ]
 
-    this.resetState(initialMemory)
+    this.resetState(initialMemory, initialRegisters)
     const initialSnap = this.captureSnapshot(0)
     this._history = [initialSnap]
     this._historyIndex = 0
@@ -208,6 +224,7 @@ export class Cpu {
     const before = this.captureSnapshot(this._historyIndex)
     const instr = this._instructions[this._pc]
     const isJump = JUMP_INSTRUCTIONS.has(instr.type)
+    const pcBeforeExec = this._pc
 
     // 命令を実行するための可変状態ビュー
     const state: MutableCpuState = {
@@ -220,6 +237,7 @@ export class Cpu {
       halted: this._halted,
     }
 
+    this._instructionsUsed.add(instr.type)
     executeInstruction(instr, state)
 
     // state への変更を反映
@@ -231,8 +249,8 @@ export class Cpu {
     this._halted = state.halted
 
     // ジャンプ命令以外はPCをインクリメント
-    // ジャンプ命令はexecuteInstruction内でPCを設定済み
-    if (!isJump && !this._halted) {
+    // 条件付き分岐が成立しなかった場合（PCが変わらなかった場合）もインクリメント
+    if (!this._halted && (!isJump || this._pc === pcBeforeExec)) {
       this._pc++
     }
 

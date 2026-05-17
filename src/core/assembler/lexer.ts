@@ -100,61 +100,25 @@ export function tokenize(source: string): TokenizeResult {
         continue
       }
 
-      // 即値 (#...)
-      if (raw[pos] === '#') {
-        pos++ // '#' を消費
-        const start = pos
-        const negative = raw[pos] === '-'
-        if (negative) pos++
-
-        // 数値部分を収集
+      // 負の即値 (-n, -0x10, -0b101)
+      if (raw[pos] === '-' && pos + 1 < raw.length && /[0-9]/.test(raw[pos + 1])) {
+        pos++ // '-' を消費
         let numStr = ''
-        if (raw[pos] === '0' && (raw[pos + 1] === 'x' || raw[pos + 1] === 'X')) {
-          numStr = raw.slice(pos, pos + 2)
-          pos += 2
-          while (pos < raw.length && /[0-9A-Fa-f]/.test(raw[pos])) {
-            numStr += raw[pos++]
-          }
-        } else if (raw[pos] === '0' && (raw[pos + 1] === 'b' || raw[pos + 1] === 'B')) {
-          numStr = raw.slice(pos, pos + 2)
-          pos += 2
-          while (pos < raw.length && /[01]/.test(raw[pos])) {
-            numStr += raw[pos++]
-          }
+        if (raw[pos] === '0' && pos + 1 < raw.length && (raw[pos + 1] === 'x' || raw[pos + 1] === 'X')) {
+          numStr = raw.slice(pos, pos + 2); pos += 2
+          while (pos < raw.length && /[0-9A-Fa-f]/.test(raw[pos])) numStr += raw[pos++]
+        } else if (raw[pos] === '0' && pos + 1 < raw.length && (raw[pos + 1] === 'b' || raw[pos + 1] === 'B')) {
+          numStr = raw.slice(pos, pos + 2); pos += 2
+          while (pos < raw.length && /[01]/.test(raw[pos])) numStr += raw[pos++]
         } else {
-          while (pos < raw.length && /[0-9]/.test(raw[pos])) {
-            numStr += raw[pos++]
-          }
+          while (pos < raw.length && /[0-9]/.test(raw[pos])) numStr += raw[pos++]
         }
-
-        const fullRaw = raw.slice(start - 1, pos) // '#' を含む全体
-        if (numStr.length === 0 || numStr === '0x' || numStr === '0b') {
-          errors.push({
-            line: lineNum,
-            column: col,
-            message: {
-              ja: '# の後に数値が必要です。例: #5, #0x10',
-              en: 'A number is required after #. Example: #5, #0x10',
-            },
-          })
-          continue
-        }
-
         const parsed = parseImmediate(numStr)
         if (parsed === null) {
-          errors.push({
-            line: lineNum,
-            column: col,
-            message: {
-              ja: `不正な即値です: #${fullRaw}`,
-              en: `Invalid immediate value: #${fullRaw}`,
-            },
-          })
+          errors.push({ line: lineNum, column: col, message: { ja: `不正な数値です: -${numStr}`, en: `Invalid number: -${numStr}` } })
           continue
         }
-
-        const value = negative ? -parsed : parsed
-        lineTokens.push({ kind: 'IMMEDIATE', value: String(value), line: lineNum, column: col })
+        lineTokens.push({ kind: 'IMMEDIATE', value: String(-parsed), line: lineNum, column: col })
         continue
       }
 
@@ -186,11 +150,28 @@ export function tokenize(source: string): TokenizeResult {
         continue
       }
 
-      // 裸の数値（[Rs + n] のオフセット用）
+      // 数値（即値: 10進 / 0x16進 / 0b2進）
       if (/[0-9]/.test(raw[pos])) {
-        const start = pos
-        while (pos < raw.length && /[0-9]/.test(raw[pos])) pos++
-        lineTokens.push({ kind: 'NUMBER', value: raw.slice(start, pos), line: lineNum, column: col })
+        let numStr = ''
+        if (raw[pos] === '0' && pos + 1 < raw.length && (raw[pos + 1] === 'x' || raw[pos + 1] === 'X')) {
+          numStr = raw.slice(pos, pos + 2); pos += 2
+          while (pos < raw.length && /[0-9A-Fa-f]/.test(raw[pos])) numStr += raw[pos++]
+        } else if (raw[pos] === '0' && pos + 1 < raw.length && (raw[pos + 1] === 'b' || raw[pos + 1] === 'B')) {
+          numStr = raw.slice(pos, pos + 2); pos += 2
+          while (pos < raw.length && /[01]/.test(raw[pos])) numStr += raw[pos++]
+        } else {
+          while (pos < raw.length && /[0-9]/.test(raw[pos])) numStr += raw[pos++]
+        }
+        if (numStr === '' || numStr === '0x' || numStr === '0b') {
+          errors.push({ line: lineNum, column: col, message: { ja: '数値が必要です。', en: 'A number is required.' } })
+          continue
+        }
+        const parsed = parseImmediate(numStr)
+        if (parsed === null) {
+          errors.push({ line: lineNum, column: col, message: { ja: `不正な数値です: ${numStr}`, en: `Invalid number: ${numStr}` } })
+          continue
+        }
+        lineTokens.push({ kind: 'IMMEDIATE', value: String(parsed), line: lineNum, column: col })
         continue
       }
 

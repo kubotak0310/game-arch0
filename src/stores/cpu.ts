@@ -15,6 +15,9 @@ function checkCondition(snapshot: CpuSnapshot, cond: SuccessCondition): boolean 
   if (cond.type === 'flag') {
     return snapshot.flags[cond.flag] === cond.expected
   }
+  if (cond.type === 'instruction_used') {
+    return snapshot.instructionsUsed.includes(cond.op)
+  }
   return false
 }
 
@@ -48,7 +51,7 @@ export const useCpuStore = defineStore('cpu', () => {
   function loadStage(stage: Stage, source = '') {
     currentStage.value = stage
     const allowed = isDebugMode.value ? undefined : stage.unlockedInstructions
-    cpu.load(source, allowed, stage.initialMemory)
+    cpu.load(source, allowed, stage.initialMemory, stage.initialRegisters)
     snapshot.value = cpu.snapshot
     parseErrors.value = cpu.errors
     lastResult.value = null
