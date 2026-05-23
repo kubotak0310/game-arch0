@@ -102,7 +102,7 @@ src/views/          ← Vue ページ（未作成）
 
 ## 開発フェーズ
 
-詳細は ARCH0_SPEC.md §10 と TASKS.md を参照。
+詳細は ARCH0_SPEC.md §11 と TASKS.md を参照。
 
 - **Phase 1** ✅ — `src/core/` CPU シミュレータ + ユニットテスト（完了）
 - **Phase 2** 🚧 — 最小限 UI：Vue 配線・CodeMirror エディタ・レジスタ表示・ステージ1プレイ可能
