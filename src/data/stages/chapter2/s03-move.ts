@@ -28,7 +28,10 @@ export const stage3: Stage = {
 
 これは ARCH-0 だけの話ではない。
 多くの計算機が、同じ制約を持っている。
-通り道を強制することで、設計が簡単になる。`
+通り道を強制することで、設計が簡単になる。
+
+「移す」と書いたが、元の値は減らない。
+計算機はコピーしか知らない。`
       },
     ],
     en: [
@@ -38,7 +41,10 @@ A register has to sit between them.
 
 This is not just ARCH-0.
 Many machines have the same restriction.
-Forcing a path through registers simplifies the design.`
+Forcing a path through registers simplifies the design.
+
+I wrote "move," but the source is unchanged.
+The machine only knows how to copy.`
       },
     ],
   },

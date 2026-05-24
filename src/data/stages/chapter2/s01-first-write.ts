@@ -26,7 +26,10 @@ export const stage1: Stage = {
 
 メモリは ARCH-0 の外にある、広い記憶域だ。
 ARCH-0 では 0x00 から 0x3F まで、64 個の格納箱がある。
-それぞれの箱に、1 つの数値が入る。`,
+それぞれの箱に、1 つの数値が入る。
+
+書いたものは、残る。
+読む人が現れるまで、ずっとそこにある。`,
       },
       {
         body: `レジスタと違って、メモリへのアクセスには専用の命令がいる。
@@ -57,7 +60,10 @@ Doing anything complex needs more places.
 
 Memory lies outside ARCH-0 — a wide store of cells.
 In ARCH-0, there are 64 slots from 0x00 to 0x3F,
-each one holding a single number.`,
+each one holding a single number.
+
+What is written stays.
+It waits there until someone reads it.`,
       },
       {
         body: `Unlike registers, memory needs dedicated instructions.

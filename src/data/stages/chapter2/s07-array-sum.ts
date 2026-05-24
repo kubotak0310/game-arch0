@@ -37,7 +37,9 @@ export const stage7: Stage = {
 100 回書くのは、さすがに違う気がする。
 
 だが、繰り返しの命令は次の章に譲る。
-ここでは 3 回、丁寧に書いて、配列の感触を確かめる。`
+ここでは 3 回、丁寧に書いて、配列の感触を確かめる。
+
+3 つなら書ける。10 になったとき、自分が少し心配だ。`
       },
     ],
     en: [
@@ -53,7 +55,9 @@ But what if there were a hundred?
 Writing the same thing a hundred times feels wrong.
 
 Still, the repeat instruction belongs to the next chapter.
-For now, write it out three times, carefully — and get a feel for the array.`
+For now, write it out three times, carefully — and get a feel for the array.
+
+Three is manageable. I worry a little about myself when it reaches ten.`
       },
     ],
   },
