@@ -10,22 +10,82 @@ import ClearModal from '../components/stage/ClearModal.vue'
 import StageHeader from '../components/stage/StageHeader.vue'
 import TaskPanel from '../components/stage/TaskPanel.vue'
 import RightTabs from '../components/stage/RightTabs.vue'
+import NoteInterlude from '../components/note/NoteInterlude.vue'
+import NotebookModal from '../components/note/NotebookModal.vue'
+import OpeningCard from '../components/OpeningCard.vue'
 import { useCpuStore } from '../stores/cpu.ts'
+import { useProgressStore } from '../stores/progress.ts'
 import { chapter1Stages } from '../data/stages/chapter1/index.ts'
+import { chapter2Stages } from '../data/stages/chapter2/index.ts'
+import { chapter3Stages } from '../data/stages/chapter3/index.ts'
 
 const cpuStore = useCpuStore()
+const progress = useProgressStore()
 const { isDebugMode } = useDebugMode()
 
-const allStages = chapter1Stages
-const currentStageIndex = ref(0)
+const allStages = [...chapter1Stages, ...chapter2Stages, ...chapter3Stages]
+const currentStageIndex = computed({
+  get: () => progress.currentStageIndex,
+  set: (v) => { progress.currentStageIndex = v },
+})
 const currentStage = computed(() => allStages[currentStageIndex.value])
 
-const clearedStageIds = ref(new Set<string>())
+interface ChapterStageInfo {
+  globalIndex: number
+  id: string
+  isCurrent: boolean
+}
+interface ChapterGroup {
+  chapter: number
+  firstIndex: number
+  stages: ChapterStageInfo[]
+}
+
+const chapterGroups = computed<ChapterGroup[]>(() => {
+  const map = new Map<number, ChapterGroup>()
+  allStages.forEach((stage, idx) => {
+    if (!map.has(stage.chapter)) {
+      map.set(stage.chapter, { chapter: stage.chapter, firstIndex: idx, stages: [] })
+    }
+    map.get(stage.chapter)!.stages.push({
+      globalIndex: idx,
+      id: stage.id,
+      isCurrent: idx === currentStageIndex.value,
+    })
+  })
+  return [...map.values()]
+})
+
+function goToStage(index: number) {
+  if (index >= 0 && index < allStages.length) currentStageIndex.value = index
+}
+
 const showClearModal = ref(false)
+const showInterlude = ref(false)
+const showOpeningCard = ref(true)
+const showNotebook = ref(false)
+const darkBackdrop = ref(true)
+
+const notebookEntries = computed(() =>
+  allStages
+    .filter(s => s.interlude && progress.isInterludeSeen(s.id))
+    .map(s => ({ stage: s, pages: s.interlude!.ja }))
+)
+
+function maybeShowInterlude() {
+  const stage = currentStage.value
+  showInterlude.value = !!stage.interlude && !progress.isInterludeSeen(stage.id)
+}
+
+function dismissInterlude() {
+  darkBackdrop.value = false
+  progress.markInterludeSeen(currentStage.value.id)
+  showInterlude.value = false
+}
 
 watch(() => cpuStore.isCleared, (cleared) => {
-  if (cleared && !clearedStageIds.value.has(currentStage.value.id)) {
-    clearedStageIds.value.add(currentStage.value.id)
+  if (cleared && !progress.isCleared(currentStage.value.id)) {
+    progress.markCleared(currentStage.value.id)
     showClearModal.value = true
   }
 })
@@ -33,7 +93,7 @@ watch(() => cpuStore.isCleared, (cleared) => {
 const canGoPrev = computed(() => currentStageIndex.value > 0)
 const canGoNext = computed(() =>
   currentStageIndex.value < allStages.length - 1 &&
-  (isDebugMode.value || clearedStageIds.value.has(currentStage.value.id))
+  (isDebugMode.value || progress.isCleared(currentStage.value.id))
 )
 const hasNextStage = computed(() => currentStageIndex.value < allStages.length - 1)
 
@@ -53,12 +113,14 @@ onMounted(() => {
   const init = currentStage.value.initialSource ?? ''
   source.value = init
   cpuStore.loadStage(currentStage.value, init)
+  // インタールードはオープニングカードが消えた後に表示する
 })
 
 watch(currentStageIndex, () => {
   const init = currentStage.value.initialSource ?? ''
   source.value = init
   cpuStore.loadStage(currentStage.value, init)
+  maybeShowInterlude()
 })
 
 function onSourceChange(val: string) {
@@ -83,9 +145,6 @@ function onClearReview() {
   showClearModal.value = false
 }
 
-const errorLinesForEditor = computed(() =>
-  cpuStore.parseErrors.map(e => e.line)
-)
 </script>
 
 <template>
@@ -96,8 +155,11 @@ const errorLinesForEditor = computed(() =>
       :total-stages="allStages.length"
       :can-go-prev="canGoPrev"
       :can-go-next="canGoNext"
+      :chapter-groups="chapterGroups"
       @go-prev="goToPrev"
       @go-next="goToNext"
+      @go-to-stage="goToStage"
+      @open-notebook="showNotebook = true"
     />
 
     <div class="stage-main">
@@ -120,7 +182,7 @@ const errorLinesForEditor = computed(() =>
             :model-value="source"
             :active-line="cpuStore.activeLine"
             :line-to-pc="cpuStore.lineToPc"
-            :error-lines="errorLinesForEditor"
+            :parse-errors="cpuStore.parseErrors"
             @update:model-value="onSourceChange"
           />
         </div>
@@ -153,10 +215,32 @@ const errorLinesForEditor = computed(() =>
       @next="onClearNext"
       @review="onClearReview"
     />
+
+    <NoteInterlude
+      v-if="showInterlude && currentStage.interlude"
+      :interlude="currentStage.interlude"
+      :stage="currentStage"
+      :dark-backdrop="darkBackdrop"
+      @start="dismissInterlude"
+    />
+
+    <NotebookModal
+      v-if="showNotebook"
+      :entries="notebookEntries"
+      :current-stage-id="currentStage.id"
+      @close="showNotebook = false"
+    />
+
+    <Transition name="opening" @after-leave="maybeShowInterlude">
+      <OpeningCard v-if="showOpeningCard" @done="showOpeningCard = false" />
+    </Transition>
   </div>
 </template>
 
 <style scoped>
+.opening-leave-active { transition: opacity 0.6s ease; }
+.opening-leave-to { opacity: 0; }
+
 .stage-layout {
   display: flex;
   flex-direction: column;

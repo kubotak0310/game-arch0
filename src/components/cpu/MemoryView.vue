@@ -11,6 +11,7 @@ const cpuStore = useCpuStore()
 const { memoryActive } = useActiveFeatures()
 
 const changedAddresses = computed(() => new Set(cpuStore.lastResult?.changedMemoryAddresses ?? []))
+const initialAddresses = computed(() => cpuStore.initialMemoryAddresses)
 
 const rows = computed(() => {
   const mem = cpuStore.snapshot.memory
@@ -58,6 +59,7 @@ function toHex2addr(n: number): string {
               class="val-cell"
               :class="{
                 'val-nonzero': cell.value !== 0,
+                'val-initial': initialAddresses.has(cell.addr),
                 'val-changed': changedAddresses.has(cell.addr),
               }"
             >
@@ -134,6 +136,10 @@ function toHex2addr(n: number): string {
 }
 .val-cell.val-nonzero {
   color: var(--color-text);
+}
+.val-cell.val-initial {
+  background: color-mix(in srgb, var(--color-accent-teal) 15%, transparent);
+  color: var(--color-accent-teal);
 }
 .val-cell.val-changed {
   background: color-mix(in srgb, var(--color-accent-amber) 20%, transparent);

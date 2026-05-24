@@ -16,6 +16,12 @@ const FLAG_DESC: Record<string, string> = {
 }
 
 const changedFlags = computed(() => new Set(cpuStore.lastResult?.changedFlags ?? []))
+
+const prevFlagValue = (flag: string): boolean | null => {
+  const prev = cpuStore.previousSnapshot
+  if (!prev) return null
+  return prev.flags[flag as keyof typeof prev.flags]
+}
 </script>
 
 <template>
@@ -33,6 +39,9 @@ const changedFlags = computed(() => new Set(cpuStore.lastResult?.changedFlags ??
       >
         <span class="flag-name">{{ flag }}</span>
         <span class="flag-desc">({{ FLAG_DESC[flag] }})</span>
+        <span v-if="changedFlags.has(flag) && prevFlagValue(flag) !== null" class="flag-prev">
+          {{ prevFlagValue(flag) ? '1' : '0' }} →
+        </span>
         <span class="flag-value">{{ cpuStore.snapshot.flags[flag] ? '1' : '0' }}</span>
       </div>
     </div>
@@ -83,6 +92,13 @@ const changedFlags = computed(() => new Set(cpuStore.lastResult?.changedFlags ??
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.flag-prev {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
   white-space: nowrap;
 }
 .flag-value {

@@ -7,12 +7,14 @@ import type { DecorationSet } from '@codemirror/view'
 import { autocompletion, completionKeymap, acceptCompletion } from '@codemirror/autocomplete'
 import type { CompletionContext, CompletionResult } from '@codemirror/autocomplete'
 import { keymap } from '@codemirror/view'
+import { linter, setDiagnostics } from '@codemirror/lint'
+import type { ParseError } from '../../core/cpu/types.ts'
 
 const props = defineProps<{
   modelValue: string
   activeLine?: number | null
   lineToPc?: Map<number, number>
-  errorLines?: readonly number[]
+  parseErrors?: readonly ParseError[]
 }>()
 const emit = defineEmits<{
   'update:modelValue': [value: string]
@@ -136,6 +138,23 @@ const errorLineField = StateField.define<DecorationSet>({
   provide: f => EditorView.decorations.from(f),
 })
 
+// ParseError[] → CodeMirror Diagnostic[] に変換
+function toDiagnostics(state: EditorState, errors: readonly ParseError[]) {
+  return errors.flatMap(err => {
+    try {
+      const line = state.doc.line(err.line)
+      const col = err.column ?? 0
+      const from = line.from + col
+      const text = line.text.slice(col)
+      const wordLen = text.match(/^[^\s,[\]]+/)?.[0]?.length ?? 1
+      const to = Math.min(from + wordLen, line.to)
+      return [{ from, to: Math.max(to, from + 1), severity: 'error' as const, message: err.message.ja }]
+    } catch {
+      return []
+    }
+  })
+}
+
 // ── PC 行番号 ──
 
 const lineNumCompartment = new Compartment()
@@ -170,6 +189,7 @@ onMounted(() => {
       activeLineField,
       errorLinesState,
       errorLineField,
+      linter(() => []),
       autocompletion({ override: [makeCompletionSource(ALL_MNEMONICS)] }),
       Prec.high(keymap.of([{ key: 'Tab', run: acceptCompletion }, ...completionKeymap])),
       EditorView.updateListener.of(update => {
@@ -269,10 +289,12 @@ watch(() => props.lineToPc, map => {
   view.dispatch({ effects: lineNumCompartment.reconfigure(makePcLineNumbers(map)) })
 })
 
-// エラー行ハイライトの更新
-watch(() => props.errorLines, lines => {
+// エラー行ハイライト + 波線の更新
+watch(() => props.parseErrors, errors => {
   if (!view) return
-  view.dispatch({ effects: setErrorLines.of(lines ?? []) })
+  const lines = (errors ?? []).map(e => e.line)
+  view.dispatch({ effects: setErrorLines.of(lines) })
+  view.dispatch(setDiagnostics(view.state, toDiagnostics(view.state, errors ?? [])))
 })
 
 

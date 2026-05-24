@@ -18,6 +18,55 @@ export const stage6: Stage = {
 
   unlockedInstructions: ['MOV', 'ADD', 'SUB', 'CMP', 'BEQ', 'BNE', 'HALT'],
 
+  interlude: {
+    ja: [
+      {
+        date: '1986 年 秋',
+        body: `分岐命令は、条件に応じて進む方向を変える。
+計算機が「判断している」わけではない。
+
+比較した結果のフラグを読んで、
+次の命令アドレスを変えるだけだ。
+それで十分、あらゆる分岐が表現できる。`,
+      },
+      {
+        diagram: 'flags' as const,
+        body: `フラグは、直前の演算結果を4ビットで記録する。
+
+N — 結果が負だった
+Z — 結果がゼロだった
+C — 桁上がりが発生した
+V — 符号付き演算で溢れた
+
+CMP命令は、引き算を行ってフラグだけを更新する。
+結果はどこにも格納されない。`,
+      },
+    ],
+    en: [
+      {
+        date: 'Autumn, 1986',
+        body: `A branch instruction changes the direction of execution.
+The machine is not "making a decision."
+
+It reads the flags left by a comparison
+and changes the next instruction address.
+That is all. And that is enough for any branch.`,
+      },
+      {
+        diagram: 'flags' as const,
+        body: `Flags record the result of the last operation in 4 bits.
+
+N — result was negative
+Z — result was zero
+C — a carry occurred
+V — signed overflow occurred
+
+CMP subtracts and updates the flags only.
+The result is not stored anywhere.`,
+      },
+    ],
+  },
+
   hints: [
     {
       kind: 'hint',

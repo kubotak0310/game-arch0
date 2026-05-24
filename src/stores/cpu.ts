@@ -29,6 +29,7 @@ export const useCpuStore = defineStore('cpu', () => {
   const parseErrors = ref<ParseError[]>([])
   const lastResult = ref<ExecutionResult | null>(null)
   const currentStage = ref<Stage | null>(null)
+  const initialMemoryAddresses = ref<Set<number>>(new Set())
 
   const isHalted = computed(() => snapshot.value.halted)
   // snapshot への依存で自動更新される
@@ -41,6 +42,11 @@ export const useCpuStore = defineStore('cpu', () => {
     void snapshot.value  // reactivity trigger
     return cpu.lineToPc
   })
+
+  const previousSnapshot = computed(() => {
+    void snapshot.value  // reactivity trigger
+    return cpu.previousSnapshot
+  })
   const isCleared = computed(() => {
     if (!currentStage.value || !lastResult.value) return false
     return currentStage.value.successConditions.every(cond =>
@@ -50,6 +56,7 @@ export const useCpuStore = defineStore('cpu', () => {
 
   function loadStage(stage: Stage, source = '') {
     currentStage.value = stage
+    initialMemoryAddresses.value = new Set(stage.initialMemory?.map(m => m.address) ?? [])
     const allowed = isDebugMode.value ? undefined : stage.unlockedInstructions
     cpu.load(source, allowed, stage.initialMemory, stage.initialRegisters)
     snapshot.value = cpu.snapshot
@@ -60,7 +67,7 @@ export const useCpuStore = defineStore('cpu', () => {
   function loadSource(source: string) {
     const stage = currentStage.value
     const allowed = isDebugMode.value ? undefined : stage?.unlockedInstructions
-    cpu.load(source, allowed, stage?.initialMemory)
+    cpu.load(source, allowed, stage?.initialMemory, stage?.initialRegisters)
     snapshot.value = cpu.snapshot
     parseErrors.value = cpu.errors
     lastResult.value = null
@@ -97,9 +104,11 @@ export const useCpuStore = defineStore('cpu', () => {
     parseErrors,
     lastResult,
     currentStage,
+    initialMemoryAddresses,
     isHalted,
     activeLine,
     lineToPc,
+    previousSnapshot,
     isCleared,
     loadStage,
     loadSource,

@@ -8,16 +8,19 @@ const REGISTERS = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5'] as const
 
 const highlighted = computed(() => new Set(cpuStore.lastResult?.changedRegisters ?? []))
 
-function formatDec(v: number): string {
-  return String(v)
-}
-
+function formatDec(v: number): string { return String(v) }
 function formatHex(v: number): string {
   return '0x' + v.toString(16).toUpperCase().padStart(4, '0')
 }
 
 const regValue = (name: string) =>
   cpuStore.snapshot.registers[name as keyof typeof cpuStore.snapshot.registers] as number
+
+const prevRegValue = (name: string): number | null => {
+  const prev = cpuStore.previousSnapshot
+  if (!prev) return null
+  return prev.registers[name as keyof typeof prev.registers] as number
+}
 
 const isR0 = (name: string) => name === 'R0'
 const isZero = (name: string) => regValue(name) === 0
@@ -41,8 +44,11 @@ const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RE
         <span class="reg-name">{{ name }}</span>
         <span v-if="name === 'R1' && showReturnBadge" class="badge-return">戻り値</span>
         <div class="reg-values">
-          <span class="reg-dec">{{ formatDec(regValue(name)) }}</span>
+          <span v-if="highlighted.has(name) && prevRegValue(name) !== null" class="reg-prev">
+            {{ formatHex(prevRegValue(name)!) }} →
+          </span>
           <span class="reg-hex">{{ formatHex(regValue(name)) }}</span>
+          <span class="reg-dec">({{ formatDec(regValue(name)) }})</span>
         </div>
       </div>
     </div>
@@ -103,18 +109,24 @@ const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RE
   align-items: baseline;
   gap: 10px;
 }
-.reg-dec {
+.reg-prev {
   font-family: ui-monospace, Consolas, monospace;
-  font-size: 15px;
-  color: var(--color-text);
-  min-width: 36px;
-  text-align: right;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
 }
 .reg-hex {
   font-family: ui-monospace, Consolas, monospace;
-  font-size: 12px;
-  color: var(--color-text-secondary);
+  font-size: 15px;
+  color: var(--color-text);
   min-width: 52px;
+  text-align: right;
+}
+.reg-dec {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  min-width: 36px;
   text-align: right;
 }
 </style>

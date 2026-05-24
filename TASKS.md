@@ -5,9 +5,9 @@
 
 ---
 
-## 現在のフェーズ: Phase 3 — 第1章の完成
+## 現在のフェーズ: Phase 4 — 第2〜終章の実装
 
-**目標:** ブラウザで `MOV R1, #2` と `MOV R2, #3` を書いて実行ボタンを押すと、レジスタ表示が変わりクリア判定が出る。
+**Phase 3 完了。** 第1章（S01〜S07）全ステージ、インタールード、図解、進捗保存、エラー表示、ステップ差分表示まで完成。
 
 ---
 
@@ -66,19 +66,22 @@
 
 ---
 
-## Phase 3 🚧 — 第1章の完成
+## Phase 3 ✅ — 第1章の完成
 
-- [ ] LOAD / STORE 命令のレキサー対応（`[0x10]` 裸数値リテラル）
-- [ ] エラー表示 タイプ1（構文エラー：赤波線・行アイコン・提案文）
-- [ ] エラー表示 タイプ2（論理エラー：実際値vs期待値の並列表示）
-- [ ] ステップ実行の差分ハイライト（変化前→変化後の表示）
+- [x] LOAD / STORE 命令のレキサー対応（`[0x10]` 裸数値リテラル）— `parseOperand()` の `LBRACKET` 分岐に `IMMEDIATE` チェックを追加
+- [x] エラー表示：赤波線（CodeMirror linter 統合）— `@codemirror/lint` の `setDiagnostics` でトークン単位の波線を追加
+- [x] ステップ実行の差分ハイライト（変化前→変化後の表示）— `previousSnapshot` を `Cpu` / cpuStore に追加、RegisterView・FlagsView に「旧値 →」表示
 - [x] **ストーリー設計** — 教員D・失踪・透明プレイヤー・5章 fade-in アーク・終章ペイオフ（[ARCH0_SPEC.md §8](ARCH0_SPEC.md#8-ストーリー設計) 参照）
-- [ ] ノートUI インタールード コンポーネント実装（`src/components/note/NoteInterlude.vue`）
-- [ ] 第1章 インタールード文章執筆（1ページ）— §8-8 のテンプレートを基に
-- [ ] 第1章 欄外メモ文章執筆（S01〜S07 のうち 5〜7 個に付与）— §8-7 のスタイル原則に従う
+- [x] ノートUI インタールード コンポーネント実装（`src/components/note/NoteInterlude.vue`）
+- [x] 第1章 インタールード文章執筆（S01〜S07 全ステージ、複数ページ対応）
+- [x] 第1章 欄外メモ文章執筆（S01〜S07 全ステージに付与）
+- [x] エラー表示 タイプ1（構文エラー：行ハイライト・エラーリスト・提案文）— TaskPanel + CodeEditor
+- [x] エラー表示 タイプ2（論理エラー：実際値 vs 期待値の並列表示）— TaskPanel の「現在: N」表示
 - [x] ヒント表示（段階的）— `HintPanel.vue`、右ペインのタブ（メモリ・スタック / ヒント）
-- [ ] 進捗保存（`src/stores/progress.ts` + pinia-plugin-persistedstate）
+- [x] 進捗保存（`src/stores/progress.ts` + pinia-plugin-persistedstate）
 - [x] 第1章ステージデータ S01〜S07 — C言語との対比ヒント・`initialSource`・`instruction_used` 条件を含む
+- [x] オープニング演出（OpeningCard.vue — 黒画面テキスト → インタールード遷移）
+- [x] ノートUI 図解（DiagramRegister / DiagramFlags / DiagramAlu / DiagramChain / DiagramSwap / DiagramLoop）
 
 ### 追加実装（Phase 3 中に判明・完了）
 
@@ -114,7 +117,24 @@
 
 ---
 
-## Phase 4 📋 — 第2〜終章の実装
+## Phase 4 🚧 — 第2〜終章の実装
+
+### 第2章「記憶の断片」（メモリ・LOAD/STORE）
+
+- [x] S01: はじめての書き込み — STORE 基本
+- [x] S02: 値を読む — LOAD 基本
+- [x] S03: 値を移す — LOAD+STORE のコンビ
+- [x] S04: 計算して保存 — read→compute→write の型
+- [x] S05: ポインタ — `[Rs]` 間接アドレッシング
+- [x] S06: 配列の要素 — `[Rs + n]` オフセット
+- [x] S07: 配列をなめる — 手動アンロール（次章のループへの予告）
+- [x] S08: 値を交換 — メモリ間スワップ
+- [x] S09: 最大値 — メモリ + 分岐の総合
+- [x] S10: コピー — 章の総仕上げ
+- [x] `chapter2/index.ts` を `StageView` に組み込み
+- [ ] 欄外メモ（章全体で 5〜7 個）— 後追いで追加可能
+
+### 第3章以降
 
 フェーズ3と同じパターンを章ごとに繰り返す。詳細は実装が近づいてから分解する。
 
@@ -127,11 +147,44 @@
 
 ---
 
+## Phase 5 📋 — バックエンド・認証（第1章公開後）
+
+**方針：** Supabase（PostgreSQL マネージドサービス）+ Google OAuth でシンプルなバックエンドを構築する。
+
+### 設計方針（決定済み）
+
+- **バックエンド:** Supabase（DB・Auth・REST API が一体。サーバー不要）
+- **認証:** Google ログイン（Supabase Auth の OAuth 連携）
+- **保存データ:** `useProgressStore` の内容をそのまま1テーブルに永続化
+
+```sql
+-- progress テーブル（イメージ）
+create table progress (
+  user_id      uuid references auth.users primary key,
+  cleared_stage_ids  text[]    default '{}',
+  seen_interlude_ids text[]    default '{}',
+  current_stage_index int      default 0,
+  updated_at   timestamptz default now()
+);
+```
+
+- **フロントエンド変更箇所:** `useProgressStore` の永続化層のみ差し替え（`pinia-plugin-persistedstate` → Supabase API 呼び出し）。Vue コンポーネントは変更不要
+- **オフライン対応:** localStorage をキャッシュとして残し、ログアウト中でもプレイ可能にする
+
+### タスク（実装フェーズで分解）
+
+- [ ] Supabase プロジェクト作成・Google OAuth 設定
+- [ ] `progress` テーブル作成・Row Level Security 設定
+- [ ] `useProgressStore` の永続化層を Supabase に切り替え
+- [ ] ログイン/ログアウト UI（シンプルなヘッダーボタン）
+- [ ] 未ログイン時は localStorage フォールバック
+
+---
+
 ## 判明した課題・メモ
 
 | 日付 | 内容 |
 |---|---|
-| Phase 1完了 | `[addr]` 直接アドレス記法（`[0x10]`形式）はレキサー未対応。Phase 3 の LOAD/STORE 実装時に追加が必要 |
 | Phase 1完了 | `ARCH0_SPEC.md` の「PC = メモリアドレス」は実装では「命令インデックス」に変更。仕様書に反映済み |
 | Phase 2完了 | ユーザーデータ領域を 0x00〜0x3F（64アドレス）に定義。MemoryView はこの範囲のみ表示。LOAD/STORE はスタック領域含む全アドレス空間にアクセス可能（SP相対引数渡しに必要） |
 | Phase 2完了 | `--color-text-muted`（gray-300）をパネルタイトル用に追加。テキスト階層: text > text-muted > text-secondary > text-tertiary |

@@ -187,6 +187,11 @@ export class Cpu {
     return this.captureSnapshot(this._historyIndex)
   }
 
+  get previousSnapshot(): CpuSnapshot | null {
+    if (this._historyIndex <= 0) return null
+    return this._history[this._historyIndex - 1]
+  }
+
   get errors(): ParseError[] {
     return this._parseErrors
   }

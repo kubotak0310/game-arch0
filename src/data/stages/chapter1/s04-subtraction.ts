@@ -17,6 +17,27 @@ export const stage4: Stage = {
 
   unlockedInstructions: ['MOV', 'ADD', 'SUB', 'HALT'],
 
+  interlude: {
+    ja: [
+      {
+        body: `R1 に 6 を入れる方法は、これだけではない。
+MOV R1, 6 と書けば終わる。
+
+それでも SUB を使うよう求めるのは、
+道具の使い方を覚えてほしいからだ。`,
+      },
+    ],
+    en: [
+      {
+        body: `There is more than one way to put 6 into R1.
+Writing MOV R1, 6 would be enough.
+
+But I ask for SUB because
+I want you to learn how to use the tool.`,
+      },
+    ],
+  },
+
   hints: [
     {
       kind: 'hint',

@@ -16,6 +16,33 @@ export const stage2: Stage = {
 
   unlockedInstructions: ['MOV', 'ADD', 'HALT'],
 
+  interlude: {
+    ja: [
+      {
+        date: '1986 年 初夏',
+        diagram: 'alu' as const,
+        body: `ADD は、2つのレジスタを足して3つ目に置く。
+足し算そのものは単純だ。
+
+問題は、どのレジスタに何の数が入っているかを
+自分で把握しなければならないことだ。
+コンピュータは教えてくれない。`,
+      },
+    ],
+    en: [
+      {
+        date: 'Early Summer, 1986',
+        diagram: 'alu' as const,
+        body: `ADD places the sum of two registers into a third.
+The addition itself is simple.
+
+The difficulty is keeping track of
+which register holds what.
+The machine will not remind you.`,
+      },
+    ],
+  },
+
   hints: [
     {
       kind: 'hint',

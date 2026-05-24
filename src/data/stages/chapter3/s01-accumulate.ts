@@ -1,9 +1,9 @@
 import type { Stage } from '../../../core/stages/types.ts'
 
-export const stage7: Stage = {
-  id: 'c1-s07-accumulate',
-  chapter: 1,
-  order: 7,
+export const stage1: Stage = {
+  id: 'c3-s01-accumulate',
+  chapter: 3,
+  order: 1,
   title: { ja: '累積加算', en: 'Accumulate' },
   objective: { ja: '1 から 5 までの合計（15）を R1 に格納せよ', en: 'Sum 1 through 5 (= 15) and store the result in R1' },
 
@@ -16,6 +16,34 @@ export const stage7: Stage = {
   ],
 
   unlockedInstructions: ['MOV', 'ADD', 'SUB', 'CMP', 'BEQ', 'BNE', 'JMP', 'HALT'],
+
+  interlude: {
+    ja: [
+      {
+        date: '1986 年 晩秋',
+        diagram: 'loop' as const,
+        body: `初めてループを書く学生は、たいてい同じ場所で詰まる。
+「どこで止まるか」を決め忘れるのだ。
+
+終わらないループは、無限に続く。当然だ。
+止まる条件を先に考えると、書き方が変わる。
+終点を決めてから、出発するといい。`,
+      },
+    ],
+    en: [
+      {
+        date: 'Late Autumn, 1986',
+        diagram: 'loop' as const,
+        body: `Students writing their first loop
+almost always get stuck at the same place.
+They forget to decide where to stop.
+
+A loop without a termination runs forever. Obviously.
+Think about the exit condition first.
+Decide the destination before you depart.`,
+      },
+    ],
+  },
 
   hints: [
     {

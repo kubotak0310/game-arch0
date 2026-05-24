@@ -18,16 +18,19 @@ function conditionMet(cond: SuccessCondition): boolean {
   if (cond.type === 'register') {
     return snap.registers[cond.target as keyof typeof snap.registers] === cond.expected
   }
+  if (cond.type === 'memory') {
+    return snap.memory[cond.address] === cond.expected
+  }
   return false
 }
 
-function currentValue(cond: SuccessCondition): string {
-  if (cond.type === 'register') {
-    const v = cpuStore.snapshot.registers[cond.target as keyof typeof cpuStore.snapshot.registers] as number
-    return String(v)
-  }
-  return '—'
+function toHex4(n: number): string {
+  return '0x' + n.toString(16).toUpperCase().padStart(4, '0')
 }
+function toHex2(n: number): string {
+  return '0x' + n.toString(16).toUpperCase().padStart(2, '0')
+}
+
 
 const allConditionsMet = computed(() =>
   props.stage.successConditions.every(conditionMet)
@@ -51,10 +54,14 @@ const allConditionsMet = computed(() =>
           <template v-if="cond.type === 'register'">
             <span class="reg">{{ cond.target }}</span>
             <span class="op"> = </span>
-            <span class="val">{{ cond.expected }}</span>
-            <span v-if="cpuStore.lastResult" class="actual">
-              （現在: {{ currentValue(cond) }}）
-            </span>
+            <span class="val">{{ toHex4(cond.expected) }}</span>
+            <span class="val-dec">({{ cond.expected }})</span>
+          </template>
+          <template v-else-if="cond.type === 'memory'">
+            <span class="addr">[{{ toHex2(cond.address) }}]</span>
+            <span class="op"> = </span>
+            <span class="val">{{ toHex2(cond.expected) }}</span>
+            <span class="val-dec">({{ cond.expected }})</span>
           </template>
           <template v-else-if="cond.type === 'instruction_used'">
             <span class="inst-name">{{ cond.op }}</span>
@@ -157,10 +164,12 @@ const allConditionsMet = computed(() =>
   color: var(--color-accent-green);
 }
 
-.reg       { color: var(--color-accent-blue);  font-family: monospace; font-weight: 600; }
+.reg       { color: var(--color-accent-blue);   font-family: monospace; font-weight: 600; }
+.addr      { color: var(--color-accent-purple); font-family: monospace; font-weight: 600; }
 .inst-name { color: var(--color-accent-blue);  font-family: monospace; font-weight: 700; }
 .op        { color: var(--color-text-secondary); }
 .val       { color: var(--color-accent-amber); font-family: monospace; font-size: 14px; font-weight: 700; }
+.val-dec   { color: var(--color-text-muted); font-family: monospace; font-size: 11px; margin-left: 2px; }
 .actual    { color: var(--color-text-tertiary); font-size: 11px; margin-left: 4px; }
 
 .error-list {

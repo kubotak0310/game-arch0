@@ -17,6 +17,29 @@ export const stage5: Stage = {
 
   unlockedInstructions: ['MOV', 'ADD', 'SUB', 'HALT'],
 
+  interlude: {
+    ja: [
+      {
+        diagram: 'swap' as const,
+        body: `2つの値を直接交換することはできない。
+必ず第3の場所が必要になる。
+
+当たり前のことだが、改めて考えると面白い。
+「直接できない」という制約が、設計の形を決める。`,
+      },
+    ],
+    en: [
+      {
+        diagram: 'swap' as const,
+        body: `Two values cannot be exchanged directly.
+A third location is always required.
+
+This seems obvious, but sitting with it is interesting.
+The constraint of "cannot be done directly" shapes the design.`,
+      },
+    ],
+  },
+
   hints: [
     {
       kind: 'hint',

@@ -153,15 +153,34 @@ class LineParser {
 
     if (t.kind === 'LBRACKET') {
       this.advance() // '['
+      const next = this.peek()
+
+      // [imm] — 直接アドレス指定: LOAD R1, [0x10]
+      if (next?.kind === 'IMMEDIATE') {
+        this.advance()
+        const addr = parseInt(next.value, 10)
+        const rbracket = this.peek()
+        if (!rbracket || rbracket.kind !== 'RBRACKET') {
+          this.errors.push({
+            line: lineNum,
+            column: rbracket?.column ?? 0,
+            message: { ja: '] が必要です', en: 'Expected ]' },
+          })
+          return null
+        }
+        this.advance()
+        return { type: 'memory_direct', address: addr & 0xFFFF }
+      }
+
       const reg = this.expectRegister()
       if (reg === null) {
-        const next = this.peek()
+        const regNext = this.peek()
         this.errors.push({
           line: lineNum,
-          column: next?.column ?? t.column,
+          column: regNext?.column ?? t.column,
           message: {
-            ja: '[ の後にレジスタが必要です。例: [R1]',
-            en: 'A register is required after [. Example: [R1]',
+            ja: '[ の後にレジスタまたは即値アドレスが必要です。例: [R1] または [0x10]',
+            en: 'A register or immediate address is required after [. Example: [R1] or [0x10]',
           },
         })
         return null

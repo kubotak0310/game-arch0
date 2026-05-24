@@ -9,6 +9,19 @@ export interface Hint extends I18nText {
   kind: 'hint' | 'answer'
 }
 
+export type DiagramType = 'registers' | 'flags' | 'alu' | 'chain' | 'swap' | 'loop'
+
+export interface NotePage {
+  date?: string
+  body: string
+  diagram?: DiagramType
+}
+
+export interface NoteInterlude {
+  ja: NotePage[]
+  en: NotePage[]
+}
+
 export type SuccessCondition =
   | { type: 'register'; target: AnyRegisterName; expected: number }
   | { type: 'memory'; address: number; expected: number }
@@ -36,4 +49,5 @@ export interface Stage {
   unlockedInstructions?: InstructionType[]
   optimizationGoals?: OptimizationGoal[]
   hints: Hint[]
+  interlude?: NoteInterlude
 }

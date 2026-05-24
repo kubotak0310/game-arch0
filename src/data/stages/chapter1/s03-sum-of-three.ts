@@ -17,6 +17,38 @@ export const stage3: Stage = {
 
   unlockedInstructions: ['MOV', 'ADD', 'HALT'],
 
+  interlude: {
+    ja: [
+      {
+        diagram: 'chain' as const,
+        body: `3つを一度に足すことはできない。
+2つ足して、その結果にもう1つを足す。
+
+単純なことだが、これが「順番に処理する」
+という意味だ。同時ではなく、逐次。
+
+最初の数行は、私が書いておいた。
+どこから始めるかより、何を書き足すかに
+集中してほしかったからだ。`,
+      },
+    ],
+    en: [
+      {
+        diagram: 'chain' as const,
+        body: `Three values cannot be added all at once.
+Two are added first, then the result receives the third.
+
+This is obvious, but it is what
+"process in sequence" means.
+Not simultaneously — one step at a time.
+
+I wrote the first few lines in advance.
+I wanted you to focus on what to add,
+not on where to begin.`,
+      },
+    ],
+  },
+
   hints: [
     {
       kind: 'hint',
