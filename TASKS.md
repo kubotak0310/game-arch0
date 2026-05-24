@@ -7,7 +7,8 @@
 
 ## 現在のフェーズ: Phase 4 — 第2〜終章の実装
 
-**Phase 3 完了。** 第1章（S01〜S07）全ステージ、インタールード、図解、進捗保存、エラー表示、ステップ差分表示まで完成。
+**Phase 3 完了。** 第1章（S01〜S06）全ステージ、インタールード、図解、進捗保存、エラー表示、ステップ差分表示まで完成。
+**Phase 4 進行中。** 第2章（S01〜S10）実装完了。第3章新設（ループ）。UI大幅改善。
 
 ---
 
@@ -79,7 +80,7 @@
 - [x] エラー表示 タイプ2（論理エラー：実際値 vs 期待値の並列表示）— TaskPanel の「現在: N」表示
 - [x] ヒント表示（段階的）— `HintPanel.vue`、右ペインのタブ（メモリ・スタック / ヒント）
 - [x] 進捗保存（`src/stores/progress.ts` + pinia-plugin-persistedstate）
-- [x] 第1章ステージデータ S01〜S07 — C言語との対比ヒント・`initialSource`・`instruction_used` 条件を含む
+- [x] 第1章ステージデータ S01〜S06 — C言語との対比ヒント・`initialSource`・`instruction_used` 条件を含む（S07=ループは第3章へ移動）
 - [x] オープニング演出（OpeningCard.vue — 黒画面テキスト → インタールード遷移）
 - [x] ノートUI 図解（DiagramRegister / DiagramFlags / DiagramAlu / DiagramChain / DiagramSwap / DiagramLoop）
 
@@ -134,9 +135,28 @@
 - [x] `chapter2/index.ts` を `StageView` に組み込み
 - [ ] 欄外メモ（章全体で 5〜7 個）— 後追いで追加可能
 
-### 第3章以降
+### 第2章で実施した UI 改善（Phase 4 中に完了）
 
-フェーズ3と同じパターンを章ごとに繰り返す。詳細は実装が近づいてから分解する。
+- [x] RegisterView: 16進優先表示（`0x0063 (99)` 形式）
+- [x] TaskPanel: memory 条件表示・16進優先表示
+- [x] MemoryView: `initialMemory` セルのティール色ハイライト
+- [x] NoteInterlude: 複数ページ → 単一スクロール化・章タイトル表示
+- [x] NotebookModal: 幅 740px・現在ステージへ自動スクロール
+- [x] StageHeader: 章インジケーター＋ステージドットによるナビゲーション UI 実装
+  - 章ボタン（✓/▶/○）・ドット（●/◉/○）・‹ › 矢印
+  - `useProgressStore` を StageHeader で直接参照することで reactivity バグを修正
+  - `right-nav` をヘッダー 2 行分の高さでフルに使う縦分割レイアウトに変更
+- [x] 数値表記ポリシー確立：量は 10 進 OK、アドレスは 16 進必須
+
+### 第3章「途切れたページ」（ループ・制御構造）
+
+- [x] S01: 累積加算 — ループの基本（`c3-s01-accumulate`、旧 c1-s07）
+- [ ] S02〜S05: フラグ・条件分岐応用（未実装）
+- [ ] S06〜S09: ループ応用（未実装）
+- [ ] S10〜S16: サブルーチン・スタック・再帰（未実装）
+- [ ] インタールード・欄外メモ文章執筆
+
+### 第4章以降
 
 各章で必要なストーリー作業（[ARCH0_SPEC.md §8](ARCH0_SPEC.md#8-ストーリー設計) 参照）：
 

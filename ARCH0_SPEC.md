@@ -1,4 +1,5 @@
 # ARCH-0 開発仕様書
+
 ## Claude Code 引き継ぎドキュメント
 
 ---
@@ -31,18 +32,18 @@
 
 ## 2. 技術スタック
 
-| 領域 | 採用技術 | 備考 |
-|---|---|---|
-| フレームワーク | Vue 3 + Composition API | 開発者のメイン経験 |
-| ビルドツール | Vite | Vue公式推奨 |
-| 状態管理 | Pinia | Composition APIと記法一致 |
-| コードエディタ | CodeMirror 6 | カスタム言語定義が容易 |
-| ルーティング | Vue Router 4 | 標準選択 |
-| i18n | vue-i18n v9 | 最初から組み込む |
-| 言語 | TypeScript | CPUコアのバグ防止 |
-| スタイリング | Tailwind CSS + scoped CSS | 設計が固まっているため |
-| テスト | Vitest | Viteとの統合 |
-| フォント | Google Fonts（Klee One, Caveat） | ノートUI用 |
+| 領域           | 採用技術                         | 備考                      |
+| -------------- | -------------------------------- | ------------------------- |
+| フレームワーク | Vue 3 + Composition API          | 開発者のメイン経験        |
+| ビルドツール   | Vite                             | Vue公式推奨               |
+| 状態管理       | Pinia                            | Composition APIと記法一致 |
+| コードエディタ | CodeMirror 6                     | カスタム言語定義が容易    |
+| ルーティング   | Vue Router 4                     | 標準選択                  |
+| i18n           | vue-i18n v9                      | 最初から組み込む          |
+| 言語           | TypeScript                       | CPUコアのバグ防止         |
+| スタイリング   | Tailwind CSS + scoped CSS        | 設計が固まっているため    |
+| テスト         | Vitest                           | Viteとの統合              |
+| フォント       | Google Fonts（Klee One, Caveat） | ノートUI用                |
 
 ---
 
@@ -52,31 +53,31 @@
 
 #### 汎用レジスタ（6本）
 
-| 名前 | 特性 | 備考 |
-|---|---|---|
-| R0 | 常に0、書き換え不可 | RISC-Vのx0と同じ思想。書き込み命令は実行されるが結果は破棄される |
-| R1 | 汎用 | |
-| R2 | 汎用 | |
-| R3 | 汎用 | |
-| R4 | 汎用 | |
-| R5 | 汎用 | |
+| 名前 | 特性                | 備考                                                             |
+| ---- | ------------------- | ---------------------------------------------------------------- |
+| R0   | 常に0、書き換え不可 | RISC-Vのx0と同じ思想。書き込み命令は実行されるが結果は破棄される |
+| R1   | 汎用                |                                                                  |
+| R2   | 汎用                |                                                                  |
+| R3   | 汎用                |                                                                  |
+| R4   | 汎用                |                                                                  |
+| R5   | 汎用                |                                                                  |
 
 #### 制御レジスタ（3本）
 
-| 名前 | 役割 | 備考 |
-|---|---|---|
-| LR | Link Register（戻りアドレス） | CALL命令実行時に自動的に戻り先アドレスが格納される |
-| SP | Stack Pointer | PUSH/POP命令で自動更新 |
-| PC | Program Counter | 現在実行中の命令アドレス |
+| 名前 | 役割                          | 備考                                               |
+| ---- | ----------------------------- | -------------------------------------------------- |
+| LR   | Link Register（戻りアドレス） | CALL命令実行時に自動的に戻り先アドレスが格納される |
+| SP   | Stack Pointer                 | PUSH/POP命令で自動更新                             |
+| PC   | Program Counter               | 現在実行中の命令アドレス                           |
 
 #### フラグ（4ビット）
 
-| 名前 | 意味 | セットされる条件 |
-|---|---|---|
-| N | Negative | 演算結果が負 |
-| Z | Zero | 演算結果が0 |
-| C | Carry | 加算でキャリー発生、減算でボロー発生 |
-| V | Overflow | 符号付き演算でオーバーフロー |
+| 名前 | 意味     | セットされる条件                     |
+| ---- | -------- | ------------------------------------ |
+| N    | Negative | 演算結果が負                         |
+| Z    | Zero     | 演算結果が0                          |
+| C    | Carry    | 加算でキャリー発生、減算でボロー発生 |
+| V    | Overflow | 符号付き演算でオーバーフロー         |
 
 ### 3-2. データ幅とアドレス空間
 
@@ -125,21 +126,21 @@ SHL  Rd, Rs, n     ; Rd = Rs << n（論理左シフト）
 SHR  Rd, Rs, n     ; Rd = Rs >> n（論理右シフト）
 ```
 
-#### 比較・分岐（第3章で追加）
+#### 比較・分岐（第1章後半〜第3章で段階的に追加）
 
 ```
-CMP  Rs1, Rs2      ; Rs1とRs2を比較してフラグを更新（結果は保存しない）
-CMP  Rs, imm       ; Rsと即値を比較してフラグを更新
-BEQ  label         ; Z=1なら labelへジャンプ
-BNE  label         ; Z=0なら labelへジャンプ
-BLT  label         ; N=1かつV=0 なら labelへジャンプ（符号付き）
-BGT  label         ; Z=0かつN=V なら labelへジャンプ（符号付き）
-BLE  label         ; Z=1またはN≠V なら labelへジャンプ（符号付き）
-BGE  label         ; N=V なら labelへジャンプ（符号付き）
-JMP  label         ; 無条件ジャンプ
+CMP  Rs1, Rs2      ; Rs1とRs2を比較してフラグを更新（結果は保存しない）  ← 第1章
+CMP  Rs, imm       ; Rsと即値を比較してフラグを更新                      ← 第1章
+BEQ  label         ; Z=1なら labelへジャンプ                             ← 第1章
+BNE  label         ; Z=0なら labelへジャンプ                             ← 第1章
+JMP  label         ; 無条件ジャンプ                                      ← 第1章
+BLT  label         ; N=1かつV=0 なら labelへジャンプ（符号付き）        ← 第3章
+BGT  label         ; Z=0かつN=V なら labelへジャンプ（符号付き）        ← 第3章
+BLE  label         ; Z=1またはN≠V なら labelへジャンプ（符号付き）      ← 第3章
+BGE  label         ; N=V なら labelへジャンプ（符号付き）               ← 第3章
 ```
 
-#### サブルーチン・スタック（第3章で追加）
+#### サブルーチン・スタック（第3章後半で追加）
 
 ```
 CALL label         ; LRに次の命令アドレスを保存し labelへジャンプ
@@ -158,13 +159,13 @@ HALT               ; プログラムの実行を停止
 
 #### レジスタの役割分担
 
-| レジスタ | 種別 | 役割 |
-|---|---|---|
-| R0 | — | 常に0（書き込み不可） |
-| R1, R2 | Caller-saved（引数・戻り値） | 呼び出し元が必要なら CALL 前に保存する。関数は自由に使ってよい |
-| R3, R4, R5 | Callee-saved | 関数が使う場合は先頭で PUSH、RET 前に POP して元の値に戻す義務がある |
-| LR | 戻りアドレス | ネスト呼び出しをする関数は先頭で `PUSH LR`、RET 前に `POP LR` する |
-| SP | スタックポインタ | 関数終了時に CALL 前と同じ値に戻す（PUSH/POP の対称性を保つ） |
+| レジスタ   | 種別                         | 役割                                                                 |
+| ---------- | ---------------------------- | -------------------------------------------------------------------- |
+| R0         | —                            | 常に0（書き込み不可）                                                |
+| R1, R2     | Caller-saved（引数・戻り値） | 呼び出し元が必要なら CALL 前に保存する。関数は自由に使ってよい       |
+| R3, R4, R5 | Callee-saved                 | 関数が使う場合は先頭で PUSH、RET 前に POP して元の値に戻す義務がある |
+| LR         | 戻りアドレス                 | ネスト呼び出しをする関数は先頭で `PUSH LR`、RET 前に `POP LR` する   |
+| SP         | スタックポインタ             | 関数終了時に CALL 前と同じ値に戻す（PUSH/POP の対称性を保つ）        |
 
 #### 引数・戻り値の渡し方
 
@@ -379,48 +380,65 @@ arch0/
 
 // CPU状態のスナップショット（巻き戻しのために毎ステップ保存）
 export interface CpuSnapshot {
-  registers: Registers
-  memory: Uint16Array
-  flags: Flags
-  pc: number
-  sp: number
-  lr: number
-  halted: boolean
-  stepIndex: number  // 何ステップ目か
+  registers: Registers;
+  memory: Uint16Array;
+  flags: Flags;
+  pc: number;
+  sp: number;
+  lr: number;
+  halted: boolean;
+  stepIndex: number; // 何ステップ目か
 }
 
 // 汎用レジスタ
 export interface Registers {
-  R0: 0              // 常に0（型レベルで固定）
-  R1: number
-  R2: number
-  R3: number
-  R4: number
-  R5: number
+  R0: 0; // 常に0（型レベルで固定）
+  R1: number;
+  R2: number;
+  R3: number;
+  R4: number;
+  R5: number;
 }
 
 // フラグ
 export interface Flags {
-  N: boolean
-  Z: boolean
-  C: boolean
-  V: boolean
+  N: boolean;
+  Z: boolean;
+  C: boolean;
+  V: boolean;
 }
 
 // 命令の種類（章ごとに段階的に解放）
 export type InstructionType =
-  | 'MOV' | 'ADD' | 'SUB'                          // 第1章
-  | 'LOAD' | 'STORE'                                // 第2章
-  | 'CMP' | 'BEQ' | 'BNE' | 'BLT' | 'BGT'
-  | 'BLE' | 'BGE' | 'JMP'                          // 第3章前半
-  | 'CALL' | 'RET' | 'PUSH' | 'POP'               // 第3章後半
-  | 'AND' | 'OR' | 'XOR' | 'NOT' | 'SHL' | 'SHR' // 第4章
-  | 'HALT'
+  | 'MOV'
+  | 'ADD'
+  | 'SUB'
+  | 'CMP'
+  | 'BEQ'
+  | 'BNE'
+  | 'JMP'
+  | 'HALT' // 第1章（基本命令・条件分岐）
+  | 'LOAD'
+  | 'STORE' // 第2章（メモリ操作）
+  | 'BLT'
+  | 'BGT'
+  | 'BLE'
+  | 'BGE'
+  | 'CALL'
+  | 'RET'
+  | 'PUSH'
+  | 'POP' // 第3章（高度な分岐・サブルーチン・スタック）
+  | 'AND'
+  | 'OR'
+  | 'XOR'
+  | 'NOT'
+  | 'SHL'
+  | 'SHR'; // 第4章（ビット操作・論理演算）
 
 // レジスタ名（コード上で使える名前）
-export type RegisterName = 'R0' | 'R1' | 'R2' | 'R3' | 'R4' | 'R5'
-export type ControlRegisterName = 'LR' | 'SP' | 'PC'
-export type AnyRegisterName = RegisterName | ControlRegisterName
+export type RegisterName = 'R0' | 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
+export type ControlRegisterName = 'LR' | 'SP' | 'PC';
+export type AnyRegisterName = RegisterName | ControlRegisterName;
 
 // オペランド
 export type Operand =
@@ -428,45 +446,45 @@ export type Operand =
   | { type: 'immediate'; value: number }
   | { type: 'memory_direct'; address: number }
   | { type: 'memory_register'; register: AnyRegisterName; offset: number }
-  | { type: 'label'; name: string }
+  | { type: 'label'; name: string };
 
 // パース済み命令（1行分）
 export interface Instruction {
-  type: InstructionType
-  operands: Operand[]
-  sourceLine: number   // 元の行番号（1始まり）
-  sourceText: string   // 元のテキスト（エラー表示用）
+  type: InstructionType;
+  operands: Operand[];
+  sourceLine: number; // 元の行番号（1始まり）
+  sourceText: string; // 元のテキスト（エラー表示用）
 }
 
 // パース結果
 export interface ParseResult {
-  instructions: Instruction[]
-  labels: Map<string, number>  // ラベル名 → 命令インデックス
-  errors: ParseError[]
+  instructions: Instruction[];
+  labels: Map<string, number>; // ラベル名 → 命令インデックス
+  errors: ParseError[];
 }
 
 // パースエラー
 export interface ParseError {
-  line: number
-  column?: number
-  message: { ja: string; en: string }
-  suggestion?: { ja: string; en: string }  // 修正提案（例: MOC → MOV）
+  line: number;
+  column?: number;
+  message: { ja: string; en: string };
+  suggestion?: { ja: string; en: string }; // 修正提案（例: MOC → MOV）
 }
 
 // 実行結果（1ステップ分）
 export interface ExecutionResult {
-  snapshot: CpuSnapshot
-  changedRegisters: AnyRegisterName[]  // 変化したレジスタ（差分ハイライト用）
-  changedMemoryAddresses: number[]     // 変化したメモリアドレス
-  changedFlags: (keyof Flags)[]        // 変化したフラグ
-  error?: RuntimeError
+  snapshot: CpuSnapshot;
+  changedRegisters: AnyRegisterName[]; // 変化したレジスタ（差分ハイライト用）
+  changedMemoryAddresses: number[]; // 変化したメモリアドレス
+  changedFlags: (keyof Flags)[]; // 変化したフラグ
+  error?: RuntimeError;
 }
 
 // 実行時エラー
 export interface RuntimeError {
-  type: 'infinite_loop' | 'stack_overflow' | 'invalid_address' | 'division_by_zero'
-  message: { ja: string; en: string }
-  line?: number
+  type: 'infinite_loop' | 'stack_overflow' | 'invalid_address' | 'division_by_zero';
+  message: { ja: string; en: string };
+  line?: number;
 }
 ```
 
@@ -476,69 +494,69 @@ export interface RuntimeError {
 // src/core/stages/types.ts
 
 export interface Stage {
-  id: string                      // 例: 'c1-s01-first-value'
-  chapter: number                 // 1〜5（5が終章）
-  order: number                   // 章内の順番
-  title: I18nText
+  id: string; // 例: 'c1-s01-first-value'
+  chapter: number; // 1〜5（5が終章）
+  order: number; // 章内の順番
+  title: I18nText;
 
   // 初期CPU状態（省略時はゼロクリア）
   // NOTE: initialRegisters は実装済みだが、現フェーズのステージでは未使用。
   //       ステージデバッグが進んだところで「残すか否か」を判断すること。
-  initialRegisters?: Partial<Omit<Registers, 'R0'>>
-  initialMemory?: Array<{ address: number; value: number }>
+  initialRegisters?: Partial<Omit<Registers, 'R0'>>;
+  initialMemory?: Array<{ address: number; value: number }>;
 
   // 成功条件（全て満たせばクリア）
-  successConditions: SuccessCondition[]
+  successConditions: SuccessCondition[];
 
   // このステージで初めて使える命令（段階的開放）
-  unlockedInstructions?: InstructionType[]
+  unlockedInstructions?: InstructionType[];
 
   // 最適化目標（主要ステージのみ設定）
-  optimizationGoals?: OptimizationGoal[]
+  optimizationGoals?: OptimizationGoal[];
 
   // ヒント（段階的に表示）
-  hints: I18nText[]              // hints[0]が最初のヒント、hints[最後]が答え
+  hints: I18nText[]; // hints[0]が最初のヒント、hints[最後]が答え
 
   // ノートデータ（物語層、省略可）
-  note?: NoteContent
+  note?: NoteContent;
 }
 
 // 成功条件
 export type SuccessCondition =
   | { type: 'register'; target: AnyRegisterName; expected: number }
   | { type: 'memory'; address: number; expected: number }
-  | { type: 'flag'; flag: keyof Flags; expected: boolean }
+  | { type: 'flag'; flag: keyof Flags; expected: boolean };
 
 // 最適化目標
 export interface OptimizationGoal {
-  type: 'instruction_count' | 'cycle_count' | 'memory_usage'
-  threshold: number
-  label: I18nText
+  type: 'instruction_count' | 'cycle_count' | 'memory_usage';
+  threshold: number;
+  label: I18nText;
 }
 
 // ノートコンテンツ（物語層）
 export interface NoteContent {
   // インタールード（ステージ前に表示）
   interlude?: {
-    ja: NotePageData
-    en: NotePageData
-  }
+    ja: NotePageData;
+    en: NotePageData;
+  };
   // 成功後に表示されるノートの欄外メモ
-  marginNote?: I18nText
+  marginNote?: I18nText;
 }
 
 export interface NotePageData {
-  title: string
-  body: string           // Markdown形式
-  marginNote?: string    // 欄外メモ（手書き風）
-  date?: string          // 例: '1987/04/12'
-  codeExample?: string   // コード例（アセンブラ）
+  title: string;
+  body: string; // Markdown形式
+  marginNote?: string; // 欄外メモ（手書き風）
+  date?: string; // 例: '1987/04/12'
+  codeExample?: string; // コード例（アセンブラ）
 }
 
 // i18n用テキスト
 export interface I18nText {
-  ja: string
-  en: string
+  ja: string;
+  en: string;
 }
 ```
 
@@ -549,61 +567,78 @@ export interface I18nText {
 
 export const useCpuStore = defineStore('cpu', () => {
   // 現在のCPU状態
-  const snapshot = ref<CpuSnapshot>(initialSnapshot())
+  const snapshot = ref<CpuSnapshot>(initialSnapshot());
 
   // 実行履歴（巻き戻し用）
-  const history = ref<CpuSnapshot[]>([])
+  const history = ref<CpuSnapshot[]>([]);
 
   // 現在のステップインデックス
-  const currentStep = ref(0)
+  const currentStep = ref(0);
 
   // パース済み命令列
-  const instructions = ref<Instruction[]>([])
+  const instructions = ref<Instruction[]>([]);
 
   // パースエラー
-  const parseErrors = ref<ParseError[]>([])
+  const parseErrors = ref<ParseError[]>([]);
 
   // 実行状態
-  const isRunning = ref(false)
-  const isHalted = ref(false)
+  const isRunning = ref(false);
+  const isHalted = ref(false);
 
   // 直前のステップで変化した要素（ハイライト用）
   const lastChanged = ref<{
-    registers: AnyRegisterName[]
-    memory: number[]
-    flags: (keyof Flags)[]
-  }>({ registers: [], memory: [], flags: [] })
+    registers: AnyRegisterName[];
+    memory: number[];
+    flags: (keyof Flags)[];
+  }>({ registers: [], memory: [], flags: [] });
 
   return {
-    snapshot, history, currentStep,
-    instructions, parseErrors,
-    isRunning, isHalted, lastChanged,
+    snapshot,
+    history,
+    currentStep,
+    instructions,
+    parseErrors,
+    isRunning,
+    isHalted,
+    lastChanged,
     // actions は別途実装
-  }
-})
+  };
+});
 
 // src/stores/execution.ts（概要）
 export const useExecutionStore = defineStore('execution', () => {
-  const speed = ref(3)           // 1〜5（実行速度）
-  const isStepMode = ref(false)  // ステップ実行モード中か
+  const speed = ref(3); // 1〜5（実行速度）
+  const isStepMode = ref(false); // ステップ実行モード中か
 
   // 実行制御アクション
-  async function run() { /* ... */ }
-  function stepForward() { /* ... */ }
-  function stepBackward() { /* ... */ }
-  function reset() { /* ... */ }
+  async function run() {
+    /* ... */
+  }
+  function stepForward() {
+    /* ... */
+  }
+  function stepBackward() {
+    /* ... */
+  }
+  function reset() {
+    /* ... */
+  }
 
-  return { speed, isStepMode, run, stepForward, stepBackward, reset }
-})
+  return { speed, isStepMode, run, stepForward, stepBackward, reset };
+});
 
 // src/stores/progress.ts（概要）
-export const useProgressStore = defineStore('progress', () => {
-  // localStorageに永続化
-  const completedStages = ref<Set<string>>(new Set())
-  const optimizationAchievements = ref<Map<string, string[]>>(new Map())
+export const useProgressStore = defineStore(
+  'progress',
+  () => {
+    // localStorageに永続化
+    const completedStages = ref<Set<string>>(new Set());
+    const optimizationAchievements = ref<Map<string, string[]>>(new Map());
 
-  return { completedStages, optimizationAchievements }
-}, { persist: true })  // pinia-plugin-persistedstate使用
+    return { completedStages, optimizationAchievements };
+  },
+  { persist: true },
+); // pinia-plugin-persistedstate使用
 ```
 
 ---
@@ -685,14 +720,14 @@ R1（RET直後のみ）:      「戻り値」バッジ（アンバー色）を�
 
 ### 6-6. UI要素の段階的開放スケジュール
 
-| 章 | 新たに表示される要素 |
-|---|---|
-| 第1章 | R0〜R5（使用分のみ色付き）、基本実行制御、課題 |
-| 第2章 | メモリビュー、SP・PCの表示、I/Oデバイス領域 |
-| 第3章前半 | フラグ（N/Z/C/V）、3カラムレイアウトへ移行 |
-| 第3章中盤 | LR表示、コールスタック、ブレークポイント |
-| 第3章後半 | スタックビュー、実行履歴タイムライン |
-| 第4章 | 表示形式切り替え（10進/16進/2進） |
+| 章        | 新たに表示される要素                           |
+| --------- | ---------------------------------------------- |
+| 第1章     | R0〜R5（使用分のみ色付き）、基本実行制御、課題 |
+| 第2章     | メモリビュー、SP・PCの表示、I/Oデバイス領域    |
+| 第3章前半 | フラグ（N/Z/C/V）、3カラムレイアウトへ移行     |
+| 第3章中盤 | LR表示、コールスタック、ブレークポイント       |
+| 第3章後半 | スタックビュー、実行履歴タイムライン           |
+| 第4章     | 表示形式切り替え（10進/16進/2進）              |
 
 ---
 
@@ -713,11 +748,13 @@ R1（RET直後のみ）:      「戻り値」バッジ（アンバー色）を�
 ### 7-2. 2つの表示場面
 
 **場面1：インタールード（ステージ間）**
+
 - 背景暗転（rgba(0,0,0,0.55)）
 - ノートが中央に浮かぶ
 - 「演習を始める」ボタンでスキップ可能
 
 **場面2：サイドパネル（ステージ中）**
+
 - 画面右側から引き出し形式
 - ステージ画面の右半分を占める
 - 閉じればステージに戻る
@@ -737,6 +774,7 @@ R1（RET直後のみ）:      「戻り値」バッジ（アンバー色）を�
 ### 8-2. 教員D（ノートの著者）
 
 **人物像**
+
 - 1970年代から計算機研究を続けた人物
 - 1980年代に私的に独自CPU「ARCH-0」を設計
 - 大学では浮いていた。論文数は少ないが、一部の学生に強烈な影響を与えた
@@ -744,12 +782,14 @@ R1（RET直後のみ）:      「戻り値」バッジ（アンバー色）を�
 - 外見・経歴の詳細描写は最小限。読者の想像に委ねる
 
 **書き手としての特性**
+
 - 文体は観察的・問いかけ的・独白的
 - 哲学的な問いを発するが、答えは出さない
 - 自分自身を客観的に観察する癖がある
 - 計算機の細部（レジスタ、フラグ、命令）に対して切実な関心を持つ
 
 **タブー（やってはいけないこと）**
+
 - 詩・小説・哲学書からの引用
 - 「論理と詩は同じだ」のような知的ポーズの発言
 - 自己憐憫・感傷的な独白
@@ -775,13 +815,13 @@ R1（RET直後のみ）:      「戻り値」バッジ（アンバー色）を�
 
 ### 8-5. 章ごとの物語進展（fade-in 方式）
 
-| 章 | タイトル | 物語面 | 失踪の扱い |
-|---|---|---|---|
-| 第1章 | 目覚め | 教科書的なノートの始まり。独白的な欄外メモ。教員Dの人柄がほのかに立ち上がる | 完全に伏せる |
-| 第2章 | 記憶の断片 | 教員自身の過去や思考の断片が滲む。「いつかこれを誰かが読むかもしれない」気配 | 完全に伏せる |
+| 章    | タイトル       | 物語面                                                                           | 失踪の扱い                     |
+| ----- | -------------- | -------------------------------------------------------------------------------- | ------------------------------ |
+| 第1章 | 目覚め         | 教科書的なノートの始まり。独白的な欄外メモ。教員Dの人柄がほのかに立ち上がる      | 完全に伏せる                   |
+| 第2章 | 記憶の断片     | 教員自身の過去や思考の断片が滲む。「いつかこれを誰かが読むかもしれない」気配     | 完全に伏せる                   |
 | 第3章 | 途切れたページ | 物語的な転機。欄外メモが日付付きになり、空白の日が増える。明確な呼びかけが現れる | 気配が滲み始める（焦り、空白） |
-| 第4章 | ARCH-0の核心 | 教員は何かを完成させようとしている。別れを意識した語り口 | 別れの予感が明確 |
-| 終章 | 最後のページ | 集大成の演習。クリア後に「未来の読者へ」のメッセージ — それは文の途中で途切れる | 事実として確定 |
+| 第4章 | ARCH-0の核心   | 教員は何かを完成させようとしている。別れを意識した語り口                         | 別れの予感が明確               |
+| 終章  | 最後のページ   | 集大成の演習。クリア後に「未来の読者へ」のメッセージ — それは文の途中で途切れる  | 事実として確定                 |
 
 **fade-in の意図：** 第1〜2章では純粋に学習に集中させ、第3章で物語の重力が強まる（章タイトル「途切れたページ」と一致）。終章のサプライズは最後まで保たれる。
 
@@ -807,6 +847,7 @@ ARCH-0 は、私が君と話すために考えた、ささやかな言葉だ。
 ノートの裏表紙は空白のまま残る。
 
 **伝えるべき骨子**
+
 - ARCH-0 は教員Dから未来の誰かへの「対話の言葉」だった
 - プレイヤーがノートを最後まで読むことで、その対話が成立した
 - 直接「失踪」「死」を明言しない
@@ -817,6 +858,7 @@ ARCH-0 は、私が君と話すために考えた、ささやかな言葉だ。
 各ステージの末尾（または特定のステージで）に、教員Dの欄外メモが現れる。**Caveat 体（手書き風）** で表示。
 
 **書き方の原則**
+
 - 1〜3行程度の短文
 - 観察・問い・独白のいずれか
 - 詩的な比喩や引用は使わない
@@ -905,14 +947,14 @@ ARCH-0 という名前は、私が勝手につけた。
 
 ## 9. 章立て・ステージ構成
 
-| 章 | タイトル | 主題 | ステージ数 |
-|---|---|---|---|
-| 第1章 | 目覚め | レジスタ・基本命令・I/O | 10〜12 |
-| 第2章 | 記憶の断片 | メモリ・配列・データ操作 | 10〜12 |
-| 第3章 | 途切れたページ | 制御構造・サブルーチン・スタック（山場） | 14〜16 |
-| 第4章 | ARCH-0の核心 | ビット操作・論理演算・応用 | 8〜10 |
-| 終章 | 最後のページ | 集大成・物語の結末 | 4〜6 |
-| 合計 | | | 46〜56ステージ |
+| 章    | タイトル       | 主題                                     | ステージ数     |
+| ----- | -------------- | ---------------------------------------- | -------------- |
+| 第1章 | 目覚め         | レジスタ・基本命令・I/O                  | 10〜12         |
+| 第2章 | 記憶の断片     | メモリ・配列・データ操作                 | 10〜12         |
+| 第3章 | 途切れたページ | 制御構造・サブルーチン・スタック（山場） | 14〜16         |
+| 第4章 | ARCH-0の核心   | ビット操作・論理演算・応用               | 8〜10          |
+| 終章  | 最後のページ   | 集大成・物語の結末                       | 4〜6           |
+| 合計  |                |                                          | 46〜56ステージ |
 
 ### 第3章の3段階構成（山場の設計）
 
@@ -939,7 +981,7 @@ const stage1: Stage = {
   order: 1,
   title: { ja: 'はじめての値', en: 'First Value' },
 
-  initialRegisters: {},  // 全ゼロ
+  initialRegisters: {}, // 全ゼロ
   initialMemory: [],
 
   successConditions: [
@@ -952,18 +994,18 @@ const stage1: Stage = {
   hints: [
     {
       ja: 'MOV命令を使います。\n例: MOV R1, 2',
-      en: 'Use the MOV instruction.\nExample: MOV R1, 2'
+      en: 'Use the MOV instruction.\nExample: MOV R1, 2',
     },
     {
       ja: 'R2にも同じパターンで書いてみましょう。\nMOV R2, 3',
-      en: 'Write the same pattern for R2.\nMOV R2, 3'
+      en: 'Write the same pattern for R2.\nMOV R2, 3',
     },
     {
       ja: '答え:\nMOV R1, 2\nMOV R2, 3',
-      en: 'Answer:\nMOV R1, 2\nMOV R2, 3'
+      en: 'Answer:\nMOV R1, 2\nMOV R2, 3',
     },
   ],
-}
+};
 ```
 
 ### 想定する正解コード
@@ -975,13 +1017,13 @@ MOV R2, 3
 
 ### 想定する失敗パターン（エラーメッセージ設計）
 
-| ケース | コード例 | メッセージ（日本語） |
-|---|---|---|
-| 命令名typo | `MOC R1, 2` | 「MOC は認識できません。MOV のことですか?」 |
-| カンマ忘れ | `MOV R1 2` | 「レジスタと値の間にカンマが必要です。例: MOV R1, 2」 |
-| 全角文字 | `ＭＯＶ R1, 2` | 「全角文字が含まれています。IMEがONになっていませんか?」 |
-| 値が違う | `MOV R1, 5` | R1の実際値と期待値(2)を並列表示 |
-| 片方だけ | `MOV R1, 2` のみ | R2が0のまま、期待値(3)を表示 |
+| ケース     | コード例         | メッセージ（日本語）                                     |
+| ---------- | ---------------- | -------------------------------------------------------- |
+| 命令名typo | `MOC R1, 2`      | 「MOC は認識できません。MOV のことですか?」              |
+| カンマ忘れ | `MOV R1 2`       | 「レジスタと値の間にカンマが必要です。例: MOV R1, 2」    |
+| 全角文字   | `ＭＯＶ R1, 2`   | 「全角文字が含まれています。IMEがONになっていませんか?」 |
+| 値が違う   | `MOV R1, 5`      | R1の実際値と期待値(2)を並列表示                          |
+| 片方だけ   | `MOV R1, 2` のみ | R2が0のまま、期待値(3)を表示                             |
 
 ---
 
@@ -1008,32 +1050,32 @@ MOV R2, 3
 ```typescript
 // テスト例
 it('MOV R1, 2 でR1に2が入る', () => {
-  const result = execute('MOV R1, 2')
-  expect(result.snapshot.registers.R1).toBe(2)
-})
+  const result = execute('MOV R1, 2');
+  expect(result.snapshot.registers.R1).toBe(2);
+});
 
 it('R0への書き込みは無視される', () => {
-  const result = execute('MOV R0, 5')
-  expect(result.snapshot.registers.R0).toBe(0)
-})
+  const result = execute('MOV R0, 5');
+  expect(result.snapshot.registers.R0).toBe(0);
+});
 
 it('ADD R3, R1, R2 でR3にR1+R2が入る', () => {
   const result = execute(`
     MOV R1, 2
     MOV R2, 3
     ADD R3, R1, R2
-  `)
-  expect(result.snapshot.registers.R3).toBe(5)
-})
+  `);
+  expect(result.snapshot.registers.R3).toBe(5);
+});
 
 it('ステップ実行で巻き戻しができる', () => {
-  const cpu = new Cpu()
-  cpu.load('MOV R1, 2\nMOV R2, 3')
-  cpu.stepForward()
-  expect(cpu.snapshot.registers.R1).toBe(2)
-  cpu.stepBackward()
-  expect(cpu.snapshot.registers.R1).toBe(0)
-})
+  const cpu = new Cpu();
+  cpu.load('MOV R1, 2\nMOV R2, 3');
+  cpu.stepForward();
+  expect(cpu.snapshot.registers.R1).toBe(2);
+  cpu.stepBackward();
+  expect(cpu.snapshot.registers.R1).toBe(0);
+});
 ```
 
 ### フェーズ2：最小限のUIでステージ1を動かす
@@ -1114,6 +1156,7 @@ R0は書き込み命令を受け付けるが、結果を破棄する。実行時
 PCはその配列インデックス（0, 1, 2, ...）を指す。
 
 これに伴う実装上の影響：
+
 - `CpuSnapshot.pc` は命令インデックス（0〜n）、表示時に「命令番号」として扱う
 - `CALL` 命令で LR に保存される値は「次の命令インデックス」（`pc + 1`）
 - メモリ空間（0x0000〜0xFFFF）はデータ専用（`LOAD`/`STORE` によるアクセスのみ）
@@ -1132,6 +1175,7 @@ PCはその配列インデックス（0, 1, 2, ...）を指す。
 `[0x10]` のような裸の数値リテラルを含む直接アドレス形式は未実装。
 
 第2章（LOAD/STORE 導入時）に以下の対応が必要：
+
 - パーサーの `parseOperand` で `LBRACKET` 直後に `IMMEDIATE` トークンが来た場合を `memory_direct` オペランドとして処理するよう拡張（レキサーは数値を `IMMEDIATE` として出力済み）
 
 ---
@@ -1144,10 +1188,10 @@ PCはその配列インデックス（0, 1, 2, ...）を指す。
 
 ```typescript
 if (!this._halted && (!isJump || this._pc === pcBeforeExec)) {
-  this._pc++
+  this._pc++;
 }
 ```
 
 ---
 
-*このドキュメントは設計議論と実装を通じて更新されています。実装時に発見した問題は適宜フィードバックしてください。*
+_このドキュメントは設計議論と実装を通じて更新されています。実装時に発見した問題は適宜フィードバックしてください。_
