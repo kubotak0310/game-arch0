@@ -51,16 +51,17 @@
 
 ### 3-1. レジスタ構成
 
-#### 汎用レジスタ（6本）
+#### 汎用レジスタ（5本）
 
-| 名前 | 特性                | 備考                                                             |
-| ---- | ------------------- | ---------------------------------------------------------------- |
-| R0   | 常に0、書き換え不可 | RISC-Vのx0と同じ思想。書き込み命令は実行されるが結果は破棄される |
-| R1   | 汎用                |                                                                  |
-| R2   | 汎用                |                                                                  |
-| R3   | 汎用                |                                                                  |
-| R4   | 汎用                |                                                                  |
-| R5   | 汎用                |                                                                  |
+| 名前 | 特性 | 備考 |
+| ---- | ---- | ---- |
+| R0   | 汎用 | すべて等しく扱われる |
+| R1   | 汎用 | 呼び出し規約上は第1引数・戻り値（[3-4](#3-4-呼び出し規約calling-convention) 参照） |
+| R2   | 汎用 | 呼び出し規約上は第2引数 |
+| R3   | 汎用 | callee-saved（関数で使うなら PUSH/POP） |
+| R4   | 汎用 | callee-saved |
+
+**設計判断（Phase 4 で変更）：** 当初は RISC-V の `x0` を参考に R0 を「常に 0」とし、汎用は 5本+ゼロレジスタの計6本という構成だった。しかし ARCH-0 はバイナリエンコーディングを持たないインタープリタ方式であり、RISC-V が `x0` を持つ理由（命令種削減）に該当しない。`CMP R3, R0` は `CMP R3, 0` で書ける。R0=0 は学習者に「特殊ルール」を1つ増やすだけのコストとなったため、Phase 4 で R0 を通常の汎用レジスタに変更し、合計を 5本（R0-R4）に減らした。
 
 #### 制御レジスタ（3本）
 
@@ -159,13 +160,13 @@ HALT               ; プログラムの実行を停止
 
 #### レジスタの役割分担
 
-| レジスタ   | 種別                         | 役割                                                                 |
-| ---------- | ---------------------------- | -------------------------------------------------------------------- |
-| R0         | —                            | 常に0（書き込み不可）                                                |
-| R1, R2     | Caller-saved（引数・戻り値） | 呼び出し元が必要なら CALL 前に保存する。関数は自由に使ってよい       |
-| R3, R4, R5 | Callee-saved                 | 関数が使う場合は先頭で PUSH、RET 前に POP して元の値に戻す義務がある |
-| LR         | 戻りアドレス                 | ネスト呼び出しをする関数は先頭で `PUSH LR`、RET 前に `POP LR` する   |
-| SP         | スタックポインタ             | 関数終了時に CALL 前と同じ値に戻す（PUSH/POP の対称性を保つ）        |
+| レジスタ | 種別 | 役割 |
+| -------- | ---- | ---- |
+| R0       | Caller-saved（スクラッチ）   | 呼び出し元が必要なら CALL 前に保存する。関数は自由に使ってよい |
+| R1, R2   | Caller-saved（引数・戻り値） | R1=第1引数・戻り値、R2=第2引数 |
+| R3, R4   | Callee-saved                 | 関数が使う場合は先頭で PUSH、RET 前に POP して元の値に戻す義務がある |
+| LR       | 戻りアドレス                 | ネスト呼び出しをする関数は先頭で `PUSH LR`、RET 前に `POP LR` する   |
+| SP       | スタックポインタ             | 関数終了時に CALL 前と同じ値に戻す（PUSH/POP の対称性を保つ）        |
 
 #### 引数・戻り値の渡し方
 
@@ -292,7 +293,7 @@ MOV  R3, 8         ; 要素数
 MOV  R1, 0         ; 合計の初期値
 
 loop:
-  CMP  R3, R0      ; R3が0かチェック（R0は常に0）
+  CMP  R3, 0       ; R3が0かチェック
   BEQ  end
   LOAD R4, [R2]    ; メモリから読み込み
   ADD  R1, R1, R4  ; 合計に加算
@@ -392,12 +393,11 @@ export interface CpuSnapshot {
 
 // 汎用レジスタ
 export interface Registers {
-  R0: 0; // 常に0（型レベルで固定）
+  R0: number;
   R1: number;
   R2: number;
   R3: number;
   R4: number;
-  R5: number;
 }
 
 // フラグ
@@ -436,7 +436,7 @@ export type InstructionType =
   | 'SHR'; // 第4章（ビット操作・論理演算）
 
 // レジスタ名（コード上で使える名前）
-export type RegisterName = 'R0' | 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
+export type RegisterName = 'R0' | 'R1' | 'R2' | 'R3' | 'R4';
 export type ControlRegisterName = 'LR' | 'SP' | 'PC';
 export type AnyRegisterName = RegisterName | ControlRegisterName;
 
@@ -502,7 +502,7 @@ export interface Stage {
   // 初期CPU状態（省略時はゼロクリア）
   // NOTE: initialRegisters は実装済みだが、現フェーズのステージでは未使用。
   //       ステージデバッグが進んだところで「残すか否か」を判断すること。
-  initialRegisters?: Partial<Omit<Registers, 'R0'>>;
+  initialRegisters?: Partial<Registers>;
   initialMemory?: Array<{ address: number; value: number }>;
 
   // 成功条件（全て満たせばクリア）
@@ -671,7 +671,6 @@ export const useProgressStore = defineStore(
 未使用（グレーアウト）: opacity: 0.35
 通常使用中:            白背景、値は数値
 直前に変化した:         緑背景（1.2秒後に通常に戻る）
-R0（常に0）:           opacity: 0.4 + 左端に細い線
 制御レジスタ:           コーラル色（#D85A30系）の背景
 R1（RET直後のみ）:      「戻り値」バッジ（アンバー色）を表示
 ```
@@ -722,7 +721,7 @@ R1（RET直後のみ）:      「戻り値」バッジ（アンバー色）を�
 
 | 章        | 新たに表示される要素                           |
 | --------- | ---------------------------------------------- |
-| 第1章     | R0〜R5（使用分のみ色付き）、基本実行制御、課題 |
+| 第1章     | R0〜R4（使用分のみ色付き）、基本実行制御、課題 |
 | 第2章     | メモリビュー、SP・PCの表示、I/Oデバイス領域    |
 | 第3章前半 | フラグ（N/Z/C/V）、3カラムレイアウトへ移行     |
 | 第3章中盤 | LR表示、コールスタック、ブレークポイント       |
@@ -874,8 +873,9 @@ ARCH-0 は、私が君と話すために考えた、ささやかな言葉だ。
 ```
 
 ```
-R0 が常に 0 であることに、私は安心する。
-一人ぐらい、変わらない者がいてもいい。
+レジスタは 5 本しかない。
+最初は不自由に思える。
+慣れると、5 本で書く方法を考えるようになる。
 ```
 
 ```
@@ -1115,9 +1115,9 @@ it('MOV R1, 2 でR1に2が入る', () => {
   expect(result.snapshot.registers.R1).toBe(2);
 });
 
-it('R0への書き込みは無視される', () => {
+it('R0 にも普通に書ける', () => {
   const result = execute('MOV R0, 5');
-  expect(result.snapshot.registers.R0).toBe(0);
+  expect(result.snapshot.registers.R0).toBe(5);
 });
 
 it('ADD R3, R1, R2 でR3にR1+R2が入る', () => {
@@ -1149,7 +1149,7 @@ it('ステップ実行で巻き戻しができる', () => {
 2. `src/stores/cpu.ts` — CPUコアのVueラッパー
 3. `src/stores/execution.ts` — 実行制御
 4. `src/components/editor/CodeEditor.vue` — CodeMirror 6の基本統合
-5. `src/components/cpu/RegisterView.vue` — レジスタ表示（第1章用：R1〜R5のみ）
+5. `src/components/cpu/RegisterView.vue` — レジスタ表示（R0〜R4）
 6. `src/components/execution/ExecutionControl.vue` — 実行ボタン
 7. `src/views/StageView.vue` — ステージ画面の骨格
 8. ステージ1のデータ定義
@@ -1180,14 +1180,9 @@ it('ステップ実行で巻き戻しができる', () => {
 
 ## 12. 設計上の重要な注意事項
 
-### R0の扱い
-
-R0は書き込み命令を受け付けるが、結果を破棄する。実行時エラーにしない。
-エディタ側でリアルタイムに警告（波線）を表示するが、実行は可能。
-
 ### LRの扱い
 
-`LR` と `R7` は全く別物。R7は存在しない（R0〜R5が汎用レジスタの全て）。
+`LR` は汎用レジスタとは別物。R5 や R6 は存在しない（R0〜R4 が汎用レジスタの全て）。
 コード上で `LR` と書くと制御レジスタのLRを指す。
 
 ### 巻き戻し機能

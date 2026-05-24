@@ -31,7 +31,7 @@ export const stage7: Stage = {
 
   LOAD R3, [R2]       ; 1 番目
   LOAD R4, [R2 + 1]   ; 2 番目
-  LOAD R5, [R2 + 2]   ; 3 番目
+  LOAD R0, [R2 + 2]   ; 3 番目
 
 しかし、もし要素が 100 個だったら？
 100 回書くのは、さすがに違う気がする。
@@ -49,7 +49,7 @@ With three elements, three LOADs are enough.
 
   LOAD R3, [R2]       ; first
   LOAD R4, [R2 + 1]   ; second
-  LOAD R5, [R2 + 2]   ; third
+  LOAD R0, [R2 + 2]   ; third
 
 But what if there were a hundred?
 Writing the same thing a hundred times feels wrong.
@@ -70,13 +70,13 @@ Three is manageable. I worry a little about myself when it reaches ten.`
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語                              // アセンブラ\nint *p = ...;                   →     MOV   R2, 0x20       ; R2 が p\nint sum = p[0] + p[1] + p[2];   →     LOAD  R3, [R2]\n                                      LOAD  R4, [R2 + 1]\n                                      LOAD  R5, [R2 + 2]\n                                      ADD   R3, R3, R4\n                                      ADD   R3, R3, R5\nmem[0x30] = sum;                →     STORE R3, [0x30]',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                                 // Assembly\nint *p = ...;                   →     MOV   R2, 0x20       ; R2 plays p\nint sum = p[0] + p[1] + p[2];   →     LOAD  R3, [R2]\n                                      LOAD  R4, [R2 + 1]\n                                      LOAD  R5, [R2 + 2]\n                                      ADD   R3, R3, R4\n                                      ADD   R3, R3, R5\nmem[0x30] = sum;                →     STORE R3, [0x30]',
+      ja: 'C言語との対応はこうなります：\n\n// C言語                              // アセンブラ\nint *p = ...;                   →     MOV   R2, 0x20       ; R2 が p\nint sum = p[0] + p[1] + p[2];   →     LOAD  R3, [R2]\n                                      LOAD  R4, [R2 + 1]\n                                      LOAD  R0, [R2 + 2]\n                                      ADD   R3, R3, R4\n                                      ADD   R3, R3, R0\nmem[0x30] = sum;                →     STORE R3, [0x30]',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                                 // Assembly\nint *p = ...;                   →     MOV   R2, 0x20       ; R2 plays p\nint sum = p[0] + p[1] + p[2];   →     LOAD  R3, [R2]\n                                      LOAD  R4, [R2 + 1]\n                                      LOAD  R0, [R2 + 2]\n                                      ADD   R3, R3, R4\n                                      ADD   R3, R3, R0\nmem[0x30] = sum;                →     STORE R3, [0x30]',
     },
     {
       kind: 'answer',
-      ja: 'MOV   R2, 0x20\nLOAD  R3, [R2]\nLOAD  R4, [R2 + 1]\nLOAD  R5, [R2 + 2]\nADD   R3, R3, R4\nADD   R3, R3, R5\nSTORE R3, [0x30]',
-      en: 'MOV   R2, 0x20\nLOAD  R3, [R2]\nLOAD  R4, [R2 + 1]\nLOAD  R5, [R2 + 2]\nADD   R3, R3, R4\nADD   R3, R3, R5\nSTORE R3, [0x30]',
+      ja: 'MOV   R2, 0x20\nLOAD  R3, [R2]\nLOAD  R4, [R2 + 1]\nLOAD  R0, [R2 + 2]\nADD   R3, R3, R4\nADD   R3, R3, R0\nSTORE R3, [0x30]',
+      en: 'MOV   R2, 0x20\nLOAD  R3, [R2]\nLOAD  R4, [R2 + 1]\nLOAD  R0, [R2 + 2]\nADD   R3, R3, R4\nADD   R3, R3, R0\nSTORE R3, [0x30]',
     },
   ],
 }

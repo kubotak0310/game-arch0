@@ -50,7 +50,7 @@ function findSuggestion(typo: string): string | null {
 }
 
 function isRegisterName(value: string): value is AnyRegisterName {
-  return ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'LR', 'SP', 'PC'].includes(value)
+  return ['R0', 'R1', 'R2', 'R3', 'R4', 'LR', 'SP', 'PC'].includes(value)
 }
 
 // トークン列をパースするためのカーソル

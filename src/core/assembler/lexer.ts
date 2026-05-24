@@ -10,7 +10,7 @@ const ALL_MNEMONICS = new Set([
 ])
 
 const ALL_REGISTERS = new Set([
-  'R0', 'R1', 'R2', 'R3', 'R4', 'R5',
+  'R0', 'R1', 'R2', 'R3', 'R4',
   'LR', 'SP', 'PC',
 ])
 

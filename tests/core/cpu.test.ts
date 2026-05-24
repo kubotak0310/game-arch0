@@ -7,9 +7,9 @@ describe('MOV 命令', () => {
     expect(result.snapshot.registers.R1).toBe(2)
   })
 
-  it('R0への書き込みは無視される', () => {
+  it('R0 にも普通に書ける', () => {
     const result = execute('MOV R0, 5')
-    expect(result.snapshot.registers.R0).toBe(0)
+    expect(result.snapshot.registers.R0).toBe(5)
   })
 
   it('レジスタ間コピー MOV R2, R1', () => {
@@ -17,19 +17,19 @@ describe('MOV 命令', () => {
     expect(result.snapshot.registers.R2).toBe(7)
   })
 
-  it('R5まで全レジスタに書ける', () => {
+  it('R0 から R4 まで全レジスタに書ける', () => {
     const result = execute(`
+      MOV R0, 0
       MOV R1, 1
       MOV R2, 2
       MOV R3, 3
       MOV R4, 4
-      MOV R5, 5
     `)
+    expect(result.snapshot.registers.R0).toBe(0)
     expect(result.snapshot.registers.R1).toBe(1)
     expect(result.snapshot.registers.R2).toBe(2)
     expect(result.snapshot.registers.R3).toBe(3)
     expect(result.snapshot.registers.R4).toBe(4)
-    expect(result.snapshot.registers.R5).toBe(5)
   })
 })
 
@@ -196,9 +196,9 @@ describe('ExecutionResult の差分', () => {
 
   it('変化なしなら changedRegisters は空', () => {
     const cpu = new Cpu()
-    cpu.load('MOV R0, 5') // R0は書き込み破棄なので変化なし
+    cpu.load('MOV R1, 0') // R1 は初期値も 0 なので変化なし
     const result = cpu.stepForward()
-    expect(result.changedRegisters).not.toContain('R0')
+    expect(result.changedRegisters).not.toContain('R1')
   })
 })
 

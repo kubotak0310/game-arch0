@@ -52,16 +52,16 @@ export const stage1: Stage = {
 このノートも、たぶん遠回りになる。`,
       },
       {
-        body: `ARCH-0 には、6つのレジスタがある。
-R0 から R5 と名付けた。
+        body: `ARCH-0 には、5つのレジスタがある。
+R0 から R4 と名付けた。
 
 レジスタとは、CPU 内部の記憶域だ。
 1つのレジスタに、1つの数値を保持する。
 演算のたびに、ここへ値を出し入れする。
 
-R0 だけは特別だ。
-常に 0 を返す。
-今はなんのためにあるのか、わからなくていい。`,
+5つは決して多くない。
+複雑な処理では、すぐに足りなくなる。
+だから後の章で、メモリやスタックを使う。`,
         diagram: 'registers' as const,
       },
       {
@@ -93,16 +93,16 @@ Showing only the shortest path, I feel nothing carries.
 This notebook, too, will probably be a detour.`,
       },
       {
-        body: `ARCH-0 has six registers.
-I named them R0 through R5.
+        body: `ARCH-0 has five registers.
+I named them R0 through R4.
 
 A register is a storage cell inside the CPU.
 Each one holds a single value.
 Every operation reads from and writes to these.
 
-R0 is different.
-It always reads as 0.
-You do not need to know why yet.`,
+Five is not many.
+Complex work runs out of room quickly.
+That is why later chapters introduce memory and the stack.`,
         diagram: 'registers' as const,
       },
       {

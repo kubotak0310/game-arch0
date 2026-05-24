@@ -17,7 +17,7 @@ import { parse } from '../assembler/parser.ts'
 const MAX_HISTORY = 1000
 
 function createInitialRegisters(): Registers {
-  return { R0: 0, R1: 0, R2: 0, R3: 0, R4: 0, R5: 0 }
+  return { R0: 0, R1: 0, R2: 0, R3: 0, R4: 0 }
 }
 
 function createInitialFlags(): Flags {
@@ -31,7 +31,7 @@ const JUMP_INSTRUCTIONS: Set<InstructionType> = new Set([
 
 function diffRegisters(before: CpuSnapshot, after: CpuSnapshot): AnyRegisterName[] {
   const changed: AnyRegisterName[] = []
-  const regNames: AnyRegisterName[] = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5']
+  const regNames: AnyRegisterName[] = ['R0', 'R1', 'R2', 'R3', 'R4']
   for (const name of regNames) {
     if (before.registers[name] !== after.registers[name]) {
       changed.push(name)
@@ -95,7 +95,7 @@ export class Cpu {
 
   private resetState(
     initialMemory?: Array<{ address: number; value: number }>,
-    initialRegisters?: Partial<Omit<Registers, 'R0'>>,
+    initialRegisters?: Partial<Registers>,
   ): void {
     this._memory = new Memory()
     if (initialMemory) {
@@ -165,7 +165,7 @@ export class Cpu {
     source: string,
     allowedInstructions?: InstructionType[],
     initialMemory?: Array<{ address: number; value: number }>,
-    initialRegisters?: Partial<Omit<Registers, 'R0'>>,
+    initialRegisters?: Partial<Registers>,
   ): void {
     const { tokens, errors: lexErrors } = tokenize(source)
     const { instructions, labels, errors: parseErrors } = parse(tokens, allowedInstructions)

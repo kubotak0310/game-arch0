@@ -5,7 +5,7 @@ import rough from 'roughjs'
 const svgEl = ref<SVGSVGElement | null>(null)
 
 const W = 400
-const H = 220
+const H = 190
 const BOX_X = 56
 const BOX_W = 240
 const ROW_H = 24
@@ -42,23 +42,16 @@ onMounted(() => {
   txt(svg, 'レジスタ', W / 2, 20, { anchor: 'middle', size: 16, weight: '600' })
   svg.appendChild(rc.line(BOX_X, 28, BOX_X + BOX_W, 28, { ...BASE, roughness: 0.8, strokeWidth: 0.8 }))
 
-  const regs = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5']
+  const regs = ['R0', 'R1', 'R2', 'R3', 'R4']
   regs.forEach((reg, i) => {
     const y = START_Y + i * (ROW_H + GAP)
-    const isR0 = i === 0
 
     svg.appendChild(rc.rectangle(
       BOX_X, y, BOX_W, ROW_H,
-      isR0
-        ? { ...BASE, fill: 'rgba(100,80,50,0.1)', fillStyle: 'hachure', hachureAngle: -41, hachureGap: 7 }
-        : { ...BASE, fill: 'none' },
+      { ...BASE, fill: 'none' },
     ))
 
     txt(svg, reg, BOX_X - 6, y + 17, { anchor: 'end' })
-
-    if (isR0) {
-      txt(svg, '← 常に 0', BOX_X + BOX_W + 10, y + 17, { size: 13, color: '#5a4020', italic: true })
-    }
   })
 })
 </script>

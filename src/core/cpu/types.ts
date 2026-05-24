@@ -11,12 +11,11 @@ export interface CpuSnapshot {
 }
 
 export interface Registers {
-  R0: 0
+  R0: number
   R1: number
   R2: number
   R3: number
   R4: number
-  R5: number
 }
 
 export interface Flags {
@@ -34,7 +33,7 @@ export type InstructionType =
   | 'AND' | 'OR' | 'XOR' | 'NOT' | 'SHL' | 'SHR'
   | 'HALT'
 
-export type RegisterName = 'R0' | 'R1' | 'R2' | 'R3' | 'R4' | 'R5'
+export type RegisterName = 'R0' | 'R1' | 'R2' | 'R3' | 'R4'
 export type ControlRegisterName = 'LR' | 'SP' | 'PC'
 export type AnyRegisterName = RegisterName | ControlRegisterName
 

@@ -32,7 +32,7 @@ const ALL_MNEMONICS = [
   'AND', 'OR', 'XOR', 'NOT', 'SHL', 'SHR',
   'HALT',
 ]
-const ALL_REGISTERS = ['R1', 'R2', 'R3', 'R4', 'R5', 'SP', 'LR']
+const ALL_REGISTERS = ['R0', 'R1', 'R2', 'R3', 'R4', 'SP', 'LR']
 
 function makeCompletionSource(instructions: readonly string[]) {
   return (context: CompletionContext): CompletionResult | null => {

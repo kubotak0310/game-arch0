@@ -16,12 +16,11 @@ export interface MutableCpuState {
 
 function readRegister(state: MutableCpuState, name: AnyRegisterName): number {
   switch (name) {
-    case 'R0': return 0
+    case 'R0': return state.registers.R0
     case 'R1': return state.registers.R1
     case 'R2': return state.registers.R2
     case 'R3': return state.registers.R3
     case 'R4': return state.registers.R4
-    case 'R5': return state.registers.R5
     case 'LR': return state.lr
     case 'SP': return state.sp
     case 'PC': return state.pc
@@ -39,12 +38,11 @@ function readRegOrImm(state: MutableCpuState, op: Operand): number {
 export function setRegister(state: MutableCpuState, name: AnyRegisterName, value: number): void {
   const masked = value & 0xFFFF
   switch (name) {
-    case 'R0': return // 書き込み破棄
+    case 'R0': state.registers.R0 = masked; return
     case 'R1': state.registers.R1 = masked; return
     case 'R2': state.registers.R2 = masked; return
     case 'R3': state.registers.R3 = masked; return
     case 'R4': state.registers.R4 = masked; return
-    case 'R5': state.registers.R5 = masked; return
     case 'LR': state.lr = masked; return
     case 'SP': state.sp = masked; return
     case 'PC': state.pc = masked; return

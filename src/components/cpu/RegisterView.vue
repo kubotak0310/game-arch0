@@ -4,7 +4,7 @@ import { useCpuStore } from '../../stores/cpu.ts'
 
 const cpuStore = useCpuStore()
 
-const REGISTERS = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5'] as const
+const REGISTERS = ['R0', 'R1', 'R2', 'R3', 'R4'] as const
 
 const highlighted = computed(() => new Set(cpuStore.lastResult?.changedRegisters ?? []))
 
@@ -22,7 +22,6 @@ const prevRegValue = (name: string): number | null => {
   return prev.registers[name as keyof typeof prev.registers] as number
 }
 
-const isR0 = (name: string) => name === 'R0'
 const isZero = (name: string) => regValue(name) === 0
 const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RET')
 </script>
@@ -36,9 +35,8 @@ const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RE
         :key="name"
         class="register-row"
         :class="{
-          'r0-row': isR0(name),
           highlighted: highlighted.has(name),
-          unused: !isR0(name) && isZero(name),
+          unused: isZero(name),
         }"
       >
         <span class="reg-name">{{ name }}</span>
@@ -73,10 +71,6 @@ const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RE
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   transition: background 0.15s, border-color 0.15s, opacity 0.15s;
-}
-.register-row.r0-row {
-  opacity: 0.4;
-  border-left: 3px solid var(--color-border);
 }
 .register-row.unused {
   opacity: 0.35;

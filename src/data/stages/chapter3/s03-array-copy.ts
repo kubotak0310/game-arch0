@@ -37,13 +37,13 @@ export const stage3: Stage = {
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語                              // アセンブラ\nuint16_t *src = (uint16_t*)0x20;  →  MOV R2, 0x20    ; (initialSource)\nuint16_t *dst = (uint16_t*)0x30;  →  MOV R3, 0x30    ; (initialSource)\nint count = 5;                    →  MOV R4, 5\ndo {                              →  loop:\n    *dst = *src;                  →    LOAD R5, [R2]\n                                  →    STORE R5, [R3]\n    src++;                        →    ADD R2, R2, 1\n    dst++;                        →    ADD R3, R3, 1\n    count--;                      →    SUB R4, R4, 1\n} while (count != 0);             →    CMP R4, 0\n                                  →    BNE loop',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                                  // Assembly\nuint16_t *src = (uint16_t*)0x20;  →  MOV R2, 0x20    ; (initialSource)\nuint16_t *dst = (uint16_t*)0x30;  →  MOV R3, 0x30    ; (initialSource)\nint count = 5;                    →  MOV R4, 5\ndo {                              →  loop:\n    *dst = *src;                  →    LOAD R5, [R2]\n                                  →    STORE R5, [R3]\n    src++;                        →    ADD R2, R2, 1\n    dst++;                        →    ADD R3, R3, 1\n    count--;                      →    SUB R4, R4, 1\n} while (count != 0);             →    CMP R4, 0\n                                  →    BNE loop',
+      ja: 'C言語との対応はこうなります：\n\n// C言語                              // アセンブラ\nuint16_t *src = (uint16_t*)0x20;  →  MOV R2, 0x20    ; (initialSource)\nuint16_t *dst = (uint16_t*)0x30;  →  MOV R3, 0x30    ; (initialSource)\nint count = 5;                    →  MOV R4, 5\ndo {                              →  loop:\n    *dst = *src;                  →    LOAD R0, [R2]\n                                  →    STORE R0, [R3]\n    src++;                        →    ADD R2, R2, 1\n    dst++;                        →    ADD R3, R3, 1\n    count--;                      →    SUB R4, R4, 1\n} while (count != 0);             →    CMP R4, 0\n                                  →    BNE loop',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                                  // Assembly\nuint16_t *src = (uint16_t*)0x20;  →  MOV R2, 0x20    ; (initialSource)\nuint16_t *dst = (uint16_t*)0x30;  →  MOV R3, 0x30    ; (initialSource)\nint count = 5;                    →  MOV R4, 5\ndo {                              →  loop:\n    *dst = *src;                  →    LOAD R0, [R2]\n                                  →    STORE R0, [R3]\n    src++;                        →    ADD R2, R2, 1\n    dst++;                        →    ADD R3, R3, 1\n    count--;                      →    SUB R4, R4, 1\n} while (count != 0);             →    CMP R4, 0\n                                  →    BNE loop',
     },
     {
       kind: 'answer',
-      ja: 'MOV R2, 0x20\nMOV R3, 0x30\nMOV R4, 5\nloop:\nLOAD R5, [R2]\nSTORE R5, [R3]\nADD R2, R2, 1\nADD R3, R3, 1\nSUB R4, R4, 1\nCMP R4, 0\nBNE loop\nHALT',
-      en: 'MOV R2, 0x20\nMOV R3, 0x30\nMOV R4, 5\nloop:\nLOAD R5, [R2]\nSTORE R5, [R3]\nADD R2, R2, 1\nADD R3, R3, 1\nSUB R4, R4, 1\nCMP R4, 0\nBNE loop\nHALT',
+      ja: 'MOV R2, 0x20\nMOV R3, 0x30\nMOV R4, 5\nloop:\nLOAD R0, [R2]\nSTORE R0, [R3]\nADD R2, R2, 1\nADD R3, R3, 1\nSUB R4, R4, 1\nCMP R4, 0\nBNE loop\nHALT',
+      en: 'MOV R2, 0x20\nMOV R3, 0x30\nMOV R4, 5\nloop:\nLOAD R0, [R2]\nSTORE R0, [R3]\nADD R2, R2, 1\nADD R3, R3, 1\nSUB R4, R4, 1\nCMP R4, 0\nBNE loop\nHALT',
     },
   ],
 }
