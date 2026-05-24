@@ -5,13 +5,13 @@ export const stage3: Stage = {
   chapter: 1,
   order: 3,
   title: { ja: '3つの和', en: 'Sum of Three' },
-  objective: { ja: 'R1・R2・R3 の合計を R4 に格納せよ', en: 'Sum R1, R2, and R3, store the result in R4' },
+  objective: { ja: 'R0・R1・R2 の合計を R3 に格納せよ', en: 'Sum R0, R1, and R2, store the result in R3' },
 
   initialMemory: [],
-  initialSource: 'MOV R1, 1\nMOV R2, 2\nMOV R3, 6\n',
+  initialSource: 'MOV R0, 1\nMOV R1, 2\nMOV R2, 6\n',
 
   successConditions: [
-    { type: 'register',          target: 'R4', expected: 9 },
+    { type: 'register',          target: 'R3', expected: 9 },
     { type: 'instruction_used', op: 'ADD' },
   ],
 
@@ -57,13 +57,13 @@ not on where to begin.`,
     },
     {
       kind: 'hint',
-      ja: '一度中間結果をレジスタに保存しましょう。\nADD R4, R1, R2  → R4 = R1+R2（= 3）\n\n次に R4 に R3 を足します。\nADD R4, R4, R3  → R4 = R4+R3（= 9）\n※ 書き先と読み元に同じレジスタを使えます（a = a+6 と同じ考え方）',
-      en: 'Store an intermediate result first.\nADD R4, R1, R2  → R4 = R1+R2 (= 3)\n\nThen add R3 to R4.\nADD R4, R4, R3  → R4 = R4+R3 (= 9)\n* The destination and source can be the same register (like a = a+6).',
+      ja: '一度中間結果をレジスタに保存しましょう。\nADD R3, R0, R1  → R3 = R0+R1（= 3）\n\n次に R3 に R2 を足します。\nADD R3, R3, R2  → R3 = R3+R2（= 9）\n※ 書き先と読み元に同じレジスタを使えます（a = a+6 と同じ考え方）',
+      en: 'Store an intermediate result first.\nADD R3, R0, R1  → R3 = R0+R1 (= 3)\n\nThen add R2 to R3.\nADD R3, R3, R2  → R3 = R3+R2 (= 9)\n* The destination and source can be the same register (like a = a+6).',
     },
     {
       kind: 'answer',
-      ja: 'MOV R1, 1\nMOV R2, 2\nMOV R3, 6\nADD R4, R1, R2\nADD R4, R4, R3',
-      en: 'MOV R1, 1\nMOV R2, 2\nMOV R3, 6\nADD R4, R1, R2\nADD R4, R4, R3',
+      ja: 'MOV R0, 1\nMOV R1, 2\nMOV R2, 6\nADD R3, R0, R1\nADD R3, R3, R2',
+      en: 'MOV R0, 1\nMOV R1, 2\nMOV R2, 6\nADD R3, R0, R1\nADD R3, R3, R2',
     },
   ],
 }

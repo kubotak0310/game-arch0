@@ -14,7 +14,7 @@ export const stage3: Stage = {
     { address: 0x23, value: 4 },
     { address: 0x24, value: 5 },
   ],
-  initialSource: 'MOV R2, 0x20\nMOV R3, 0x30\n',
+  initialSource: 'MOV R0, 0x20\nMOV R1, 0x30\n',
 
   successConditions: [
     { type: 'memory', address: 0x30, expected: 1 },
@@ -32,18 +32,18 @@ export const stage3: Stage = {
   hints: [
     {
       kind: 'hint',
-      ja: '2 つのポインタを動かしながらループします：\n  R2 = 元のアドレス（initialSource で 0x20）\n  R3 = 先のアドレス（initialSource で 0x30）\n\n各反復で：\n  ① [R2] から読み\n  ② [R3] へ書き\n  ③ 両方のポインタを 1 進める\n  ④ カウンタを減らす',
-      en: 'Loop while moving two pointers:\n  R2 = source address (initialSource sets 0x20)\n  R3 = destination address (initialSource sets 0x30)\n\nEach iteration:\n  ① Read from [R2]\n  ② Write to [R3]\n  ③ Advance both pointers by 1\n  ④ Decrement the counter',
+      ja: '2 つのポインタを動かしながらループします：\n  R0 = 元のアドレス（initialSource で 0x20）\n  R1 = 先のアドレス（initialSource で 0x30）\n\n各反復で：\n  ① [R0] から読み\n  ② [R1] へ書き\n  ③ 両方のポインタを 1 進める\n  ④ カウンタを減らす',
+      en: 'Loop while moving two pointers:\n  R0 = source address (initialSource sets 0x20)\n  R1 = destination address (initialSource sets 0x30)\n\nEach iteration:\n  ① Read from [R0]\n  ② Write to [R1]\n  ③ Advance both pointers by 1\n  ④ Decrement the counter',
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語                              // アセンブラ\nuint16_t *src = (uint16_t*)0x20;  →  MOV R2, 0x20    ; (initialSource)\nuint16_t *dst = (uint16_t*)0x30;  →  MOV R3, 0x30    ; (initialSource)\nint count = 5;                    →  MOV R4, 5\ndo {                              →  loop:\n    *dst = *src;                  →    LOAD R0, [R2]\n                                  →    STORE R0, [R3]\n    src++;                        →    ADD R2, R2, 1\n    dst++;                        →    ADD R3, R3, 1\n    count--;                      →    SUB R4, R4, 1\n} while (count != 0);             →    CMP R4, 0\n                                  →    BNE loop',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                                  // Assembly\nuint16_t *src = (uint16_t*)0x20;  →  MOV R2, 0x20    ; (initialSource)\nuint16_t *dst = (uint16_t*)0x30;  →  MOV R3, 0x30    ; (initialSource)\nint count = 5;                    →  MOV R4, 5\ndo {                              →  loop:\n    *dst = *src;                  →    LOAD R0, [R2]\n                                  →    STORE R0, [R3]\n    src++;                        →    ADD R2, R2, 1\n    dst++;                        →    ADD R3, R3, 1\n    count--;                      →    SUB R4, R4, 1\n} while (count != 0);             →    CMP R4, 0\n                                  →    BNE loop',
+      ja: 'C言語との対応はこうなります：\n\n// C言語                              // アセンブラ\nuint16_t *src = (uint16_t*)0x20;  →  MOV R0, 0x20    ; (initialSource)\nuint16_t *dst = (uint16_t*)0x30;  →  MOV R1, 0x30    ; (initialSource)\nint count = 5;                    →  MOV R2, 5\ndo {                              →  loop:\n    *dst = *src;                  →    LOAD R3, [R0]\n                                  →    STORE R3, [R1]\n    src++;                        →    ADD R0, R0, 1\n    dst++;                        →    ADD R1, R1, 1\n    count--;                      →    SUB R2, R2, 1\n} while (count != 0);             →    CMP R2, 0\n                                  →    BNE loop',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                                  // Assembly\nuint16_t *src = (uint16_t*)0x20;  →  MOV R0, 0x20    ; (initialSource)\nuint16_t *dst = (uint16_t*)0x30;  →  MOV R1, 0x30    ; (initialSource)\nint count = 5;                    →  MOV R2, 5\ndo {                              →  loop:\n    *dst = *src;                  →    LOAD R3, [R0]\n                                  →    STORE R3, [R1]\n    src++;                        →    ADD R0, R0, 1\n    dst++;                        →    ADD R1, R1, 1\n    count--;                      →    SUB R2, R2, 1\n} while (count != 0);             →    CMP R2, 0\n                                  →    BNE loop',
     },
     {
       kind: 'answer',
-      ja: 'MOV R2, 0x20\nMOV R3, 0x30\nMOV R4, 5\nloop:\nLOAD R0, [R2]\nSTORE R0, [R3]\nADD R2, R2, 1\nADD R3, R3, 1\nSUB R4, R4, 1\nCMP R4, 0\nBNE loop\nHALT',
-      en: 'MOV R2, 0x20\nMOV R3, 0x30\nMOV R4, 5\nloop:\nLOAD R0, [R2]\nSTORE R0, [R3]\nADD R2, R2, 1\nADD R3, R3, 1\nSUB R4, R4, 1\nCMP R4, 0\nBNE loop\nHALT',
+      ja: 'MOV R0, 0x20\nMOV R1, 0x30\nMOV R2, 5\nloop:\nLOAD R3, [R0]\nSTORE R3, [R1]\nADD R0, R0, 1\nADD R1, R1, 1\nSUB R2, R2, 1\nCMP R2, 0\nBNE loop\nHALT',
+      en: 'MOV R0, 0x20\nMOV R1, 0x30\nMOV R2, 5\nloop:\nLOAD R3, [R0]\nSTORE R3, [R1]\nADD R0, R0, 1\nADD R1, R1, 1\nSUB R2, R2, 1\nCMP R2, 0\nBNE loop\nHALT',
     },
   ],
 }

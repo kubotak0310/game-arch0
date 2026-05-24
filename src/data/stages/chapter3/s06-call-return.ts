@@ -5,13 +5,13 @@ export const stage6: Stage = {
   chapter: 3,
   order: 6,
   title: { ja: '関数を呼ぶ', en: 'Call a Function' },
-  objective: { ja: '関数 set_value を呼び出して R3 に 99 を格納せよ', en: 'Call the set_value function so that R3 holds 99' },
+  objective: { ja: '関数 set_value を呼び出して R0 に 99 を格納せよ', en: 'Call the set_value function so that R0 holds 99' },
 
   initialMemory: [],
-  initialSource: 'JMP main\n\nset_value:\nMOV R3, 99\nRET\n\nmain:\n',
+  initialSource: 'JMP main\n\nset_value:\nMOV R0, 99\nRET\n\nmain:\n',
 
   successConditions: [
-    { type: 'register', target: 'R3', expected: 99 },
+    { type: 'register', target: 'R0', expected: 99 },
     { type: 'instruction_used', op: 'CALL' },
     { type: 'instruction_used', op: 'RET' },
   ],
@@ -26,13 +26,13 @@ export const stage6: Stage = {
     },
     {
       kind: 'hint',
-      ja: 'main の中で CALL set_value を書き、その後に HALT を置きます。\n\nC言語との対応はこうなります：\n\n// C言語              // アセンブラ\nvoid set_value() {  →  set_value:    ; (initialSource)\n    r3 = 99;        →    MOV R3, 99\n}                   →    RET\n\nint main() {        →  main:         ; (initialSource)\n    set_value();    →    CALL set_value\n    return 0;       →    HALT\n}',
-      en: 'In main, write CALL set_value followed by HALT.\n\nC-to-assembly mapping:\n\n// C                  // Assembly\nvoid set_value() {  →  set_value:    ; (initialSource)\n    r3 = 99;        →    MOV R3, 99\n}                   →    RET\n\nint main() {        →  main:         ; (initialSource)\n    set_value();    →    CALL set_value\n    return 0;       →    HALT\n}',
+      ja: 'main の中で CALL set_value を書き、その後に HALT を置きます。\n\nC言語との対応はこうなります：\n\n// C言語              // アセンブラ\nvoid set_value() {  →  set_value:    ; (initialSource)\n    r0 = 99;        →    MOV R0, 99\n}                   →    RET\n\nint main() {        →  main:         ; (initialSource)\n    set_value();    →    CALL set_value\n    return 0;       →    HALT\n}',
+      en: 'In main, write CALL set_value followed by HALT.\n\nC-to-assembly mapping:\n\n// C                  // Assembly\nvoid set_value() {  →  set_value:    ; (initialSource)\n    r0 = 99;        →    MOV R0, 99\n}                   →    RET\n\nint main() {        →  main:         ; (initialSource)\n    set_value();    →    CALL set_value\n    return 0;       →    HALT\n}',
     },
     {
       kind: 'answer',
-      ja: 'JMP main\n\nset_value:\nMOV R3, 99\nRET\n\nmain:\nCALL set_value\nHALT',
-      en: 'JMP main\n\nset_value:\nMOV R3, 99\nRET\n\nmain:\nCALL set_value\nHALT',
+      ja: 'JMP main\n\nset_value:\nMOV R0, 99\nRET\n\nmain:\nCALL set_value\nHALT',
+      en: 'JMP main\n\nset_value:\nMOV R0, 99\nRET\n\nmain:\nCALL set_value\nHALT',
     },
   ],
 }

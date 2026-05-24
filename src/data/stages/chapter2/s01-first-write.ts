@@ -44,9 +44,9 @@ LOAD  — メモリの値を、レジスタへ読み込む。
         body: `MOV は「レジスタとレジスタ」の命令だった。
 STORE/LOAD は「レジスタとメモリ」の命令だ。
 
-MOV   R1, R2      → R2 の値を R1 にコピー  （メモリ使わない）
-STORE R1, [0x10]  → R1 の値をメモリへ書く
-LOAD  R1, [0x10]  → メモリの値を R1 へ読む
+MOV   R0, R1      → R1 の値を R0 にコピー  （メモリ使わない）
+STORE R0, [0x10]  → R0 の値をメモリへ書く
+LOAD  R0, [0x10]  → メモリの値を R0 へ読む
 
 [ ] の中がアドレスだ。
 数値でも、レジスタでも指定できる。`
@@ -78,9 +78,9 @@ That is what the square brackets in [0x10] mean.`,
         body: `MOV moved values between registers.
 STORE and LOAD move values between registers and memory.
 
-MOV   R1, R2      → copy R2 into R1         (no memory involved)
-STORE R1, [0x10]  → write R1 into memory
-LOAD  R1, [0x10]  → read from memory into R1
+MOV   R0, R1      → copy R1 into R0         (no memory involved)
+STORE R0, [0x10]  → write R0 into memory
+LOAD  R0, [0x10]  → read from memory into R0
 
 The address goes inside [ ].
 It can be a number or a register.`
@@ -91,18 +91,18 @@ It can be a number or a register.`
   hints: [
     {
       kind: 'hint',
-      ja: 'STORE 命令を使います。\n書き込みたい値をまずレジスタに入れて、\nそれをメモリへ「住所付き」で送ります。\n\n例: STORE R1, [0x10]',
-      en: 'Use STORE.\nFirst put the value in a register,\nthen send it to memory with an address.\n\nExample: STORE R1, [0x10]',
+      ja: 'STORE 命令を使います。\n書き込みたい値をまずレジスタに入れて、\nそれをメモリへ「住所付き」で送ります。\n\n例: STORE R0, [0x10]',
+      en: 'Use STORE.\nFirst put the value in a register,\nthen send it to memory with an address.\n\nExample: STORE R0, [0x10]',
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語              // アセンブラ\nmem[0x10] = 42;  →   MOV   R1, 42\n                     STORE R1, [0x10]\n\n値をレジスタ経由でメモリに置きます。',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                 // Assembly\nmem[0x10] = 42;  →   MOV   R1, 42\n                     STORE R1, [0x10]\n\nThe value goes through a register on its way to memory.',
+      ja: 'C言語との対応はこうなります：\n\n// C言語              // アセンブラ\nmem[0x10] = 42;  →   MOV   R0, 42\n                     STORE R0, [0x10]\n\n値をレジスタ経由でメモリに置きます。',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                 // Assembly\nmem[0x10] = 42;  →   MOV   R0, 42\n                     STORE R0, [0x10]\n\nThe value goes through a register on its way to memory.',
     },
     {
       kind: 'answer',
-      ja: 'MOV R1, 42\nSTORE R1, [0x10]',
-      en: 'MOV R1, 42\nSTORE R1, [0x10]',
+      ja: 'MOV R0, 42\nSTORE R0, [0x10]',
+      en: 'MOV R0, 42\nSTORE R0, [0x10]',
     },
   ],
 }

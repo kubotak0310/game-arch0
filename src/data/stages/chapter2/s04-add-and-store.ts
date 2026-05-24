@@ -60,13 +60,13 @@ I cannot think of a task that falls outside these three.`
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語                                  // アセンブラ\nmem[0x20] = mem[0x10] + mem[0x11];  →    LOAD  R1, [0x10]\n                                         LOAD  R2, [0x11]\n                                         ADD   R3, R1, R2\n                                         STORE R3, [0x20]',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                                     // Assembly\nmem[0x20] = mem[0x10] + mem[0x11];  →    LOAD  R1, [0x10]\n                                         LOAD  R2, [0x11]\n                                         ADD   R3, R1, R2\n                                         STORE R3, [0x20]',
+      ja: 'C言語との対応はこうなります：\n\n// C言語                                  // アセンブラ\nmem[0x20] = mem[0x10] + mem[0x11];  →    LOAD  R0, [0x10]\n                                         LOAD  R1, [0x11]\n                                         ADD   R2, R0, R1\n                                         STORE R2, [0x20]',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                                     // Assembly\nmem[0x20] = mem[0x10] + mem[0x11];  →    LOAD  R0, [0x10]\n                                         LOAD  R1, [0x11]\n                                         ADD   R2, R0, R1\n                                         STORE R2, [0x20]',
     },
     {
       kind: 'answer',
-      ja: 'LOAD  R1, [0x10]\nLOAD  R2, [0x11]\nADD   R3, R1, R2\nSTORE R3, [0x20]',
-      en: 'LOAD  R1, [0x10]\nLOAD  R2, [0x11]\nADD   R3, R1, R2\nSTORE R3, [0x20]',
+      ja: 'LOAD  R0, [0x10]\nLOAD  R1, [0x11]\nADD   R2, R0, R1\nSTORE R2, [0x20]',
+      en: 'LOAD  R0, [0x10]\nLOAD  R1, [0x11]\nADD   R2, R0, R1\nSTORE R2, [0x20]',
     },
   ],
 }

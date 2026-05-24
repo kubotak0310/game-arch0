@@ -5,15 +5,15 @@ export const stage5: Stage = {
   chapter: 2,
   order: 5,
   title: { ja: 'ポインタ', en: 'Pointer' },
-  objective: { ja: 'R2 が指すアドレスの値を R1 に読み込め', en: 'Read the value at the address held in R2 into R1' },
+  objective: { ja: 'R1 が指すアドレスの値を R0 に読み込め', en: 'Read the value at the address held in R1 into R0' },
 
   initialMemory: [
     { address: 0x30, value: 99 },
   ],
-  initialSource: 'MOV R2, 0x30\n',
+  initialSource: 'MOV R1, 0x30\n',
 
   successConditions: [
-    { type: 'register', target: 'R1', expected: 99 },
+    { type: 'register', target: 'R0', expected: 99 },
     { type: 'instruction_used', op: 'LOAD' },
   ],
 
@@ -27,7 +27,7 @@ export const stage5: Stage = {
 [0x30] と直接書くこともできるが、
 レジスタに「住所」を入れて、それを通して読むこともできる。
 
-LOAD R1, [R2]   ; R2 が指している場所から読む
+LOAD R0, [R1]   ; R1 が指している場所から読む
 
 これがポインタの最初の姿だ。
 アドレス自身が、変数として扱える。`,
@@ -36,8 +36,8 @@ LOAD R1, [R2]   ; R2 が指している場所から読む
         body: `住所を変数にできると、何が変わるか。
 
 同じ命令で、違う場所にアクセスできるようになる。
-R2 の値を 0x30 から 0x38 に変えれば、
-LOAD R1, [R2] は別の場所から読み始める。
+R1 の値を 0x30 から 0x38 に変えれば、
+LOAD R0, [R1] は別の場所から読み始める。
 
 「どこを読むか」を、実行時に決められる。
 これが、配列やループの土台になる。
@@ -52,7 +52,7 @@ LOAD R1, [R2] は別の場所から読み始める。
 You can write [0x30] directly,
 or put the "address" in a register and read through it.
 
-LOAD R1, [R2]   ; read from the place R2 points to
+LOAD R0, [R1]   ; read from the place R1 points to
 
 This is the first shape of a pointer.
 The address itself can be treated as a variable.`,
@@ -61,8 +61,8 @@ The address itself can be treated as a variable.`,
         body: `What changes when an address becomes a variable?
 
 The same instruction can reach different places.
-Change R2 from 0x30 to 0x38,
-and LOAD R1, [R2] reads from somewhere else.
+Change R1 from 0x30 to 0x38,
+and LOAD R0, [R1] reads from somewhere else.
 
 You decide where to read at runtime, not before.
 This is the ground beneath arrays and loops.
@@ -75,18 +75,18 @@ When I first grasped the idea of treating an address as a variable, something cl
   hints: [
     {
       kind: 'hint',
-      ja: '冒頭の MOV R2, 0x30 で、R2 にアドレス 0x30 が入ります。\nそのあと LOAD で「R2 が指す場所」から値を取ってきます。\n\n例: LOAD R1, [R2]',
-      en: 'The opening MOV R2, 0x30 places the address 0x30 into R2.\nThen use LOAD to read from where R2 points.\n\nExample: LOAD R1, [R2]',
+      ja: '冒頭の MOV R1, 0x30 で、R1 にアドレス 0x30 が入ります。\nそのあと LOAD で「R1 が指す場所」から値を取ってきます。\n\n例: LOAD R0, [R1]',
+      en: 'The opening MOV R1, 0x30 places the address 0x30 into R1.\nThen use LOAD to read from where R1 points.\n\nExample: LOAD R0, [R1]',
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語              // アセンブラ\nint *p = ...;     →   （R2 が p に相当）\nint r1 = *p;      →   LOAD R1, [R2]\n\n[R2] は「R2 が指している場所」という意味です。',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                 // Assembly\nint *p = ...;     →   (R2 plays the role of p)\nint r1 = *p;      →   LOAD R1, [R2]\n\n[R2] means "the place R2 points to."',
+      ja: 'C言語との対応はこうなります：\n\n// C言語              // アセンブラ\nint *p = ...;     →   （R1 が p に相当）\nint r1 = *p;      →   LOAD R0, [R1]\n\n[R1] は「R1 が指している場所」という意味です。',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                 // Assembly\nint *p = ...;     →   (R1 plays the role of p)\nint r1 = *p;      →   LOAD R0, [R1]\n\n[R1] means "the place R1 points to."',
     },
     {
       kind: 'answer',
-      ja: 'MOV  R2, 0x30\nLOAD R1, [R2]',
-      en: 'MOV  R2, 0x30\nLOAD R1, [R2]',
+      ja: 'MOV  R1, 0x30\nLOAD R0, [R1]',
+      en: 'MOV  R1, 0x30\nLOAD R0, [R1]',
     },
   ],
 }

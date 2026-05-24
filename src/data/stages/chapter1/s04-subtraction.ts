@@ -5,13 +5,13 @@ export const stage4: Stage = {
   chapter: 1,
   order: 4,
   title: { ja: '引き算', en: 'Subtraction' },
-  objective: { ja: 'R1 から R2 を引いた結果を R1 に格納せよ', en: 'Subtract R2 from R1 and store the result back in R1' },
+  objective: { ja: 'R0 から R1 を引いた結果を R0 に格納せよ', en: 'Subtract R1 from R0 and store the result back in R0' },
 
   initialMemory: [],
-  initialSource: 'MOV R1, 10\nMOV R2, 4\n',
+  initialSource: 'MOV R0, 10\nMOV R1, 4\n',
 
   successConditions: [
-    { type: 'register',          target: 'R1', expected: 6 },
+    { type: 'register',          target: 'R0', expected: 6 },
     { type: 'instruction_used', op: 'SUB' },
   ],
 
@@ -20,8 +20,8 @@ export const stage4: Stage = {
   interlude: {
     ja: [
       {
-        body: `R1 に 6 を入れる方法は、これだけではない。
-MOV R1, 6 と書けば終わる。
+        body: `R0 に 6 を入れる方法は、これだけではない。
+MOV R0, 6 と書けば終わる。
 
 それでも SUB を使うよう求めるのは、
 道具の使い方を覚えてほしいからだ。`,
@@ -29,8 +29,8 @@ MOV R1, 6 と書けば終わる。
     ],
     en: [
       {
-        body: `There is more than one way to put 6 into R1.
-Writing MOV R1, 6 would be enough.
+        body: `There is more than one way to put 6 into R0.
+Writing MOV R0, 6 would be enough.
 
 But I ask for SUB because
 I want you to learn how to use the tool.`,
@@ -46,13 +46,13 @@ I want you to learn how to use the tool.`,
     },
     {
       kind: 'hint',
-      ja: '書き先と読み元に同じレジスタを使えます（a = a - 4 と同じ考え方）。\nSUB R1, R1, R2 → R1 = R1 - R2\nこれで R1 の値を直接更新できます。',
-      en: 'The destination and source can be the same register (like a = a - 4).\nSUB R1, R1, R2 → R1 = R1 - R2\nThis updates R1 directly.',
+      ja: '書き先と読み元に同じレジスタを使えます（a = a - 4 と同じ考え方）。\nSUB R0, R0, R1 → R0 = R0 - R1\nこれで R0 の値を直接更新できます。',
+      en: 'The destination and source can be the same register (like a = a - 4).\nSUB R0, R0, R1 → R0 = R0 - R1\nThis updates R0 directly.',
     },
     {
       kind: 'answer',
-      ja: 'MOV R1, 10\nMOV R2, 4\nSUB R1, R1, R2',
-      en: 'MOV R1, 10\nMOV R2, 4\nSUB R1, R1, R2',
+      ja: 'MOV R0, 10\nMOV R1, 4\nSUB R0, R0, R1',
+      en: 'MOV R0, 10\nMOV R1, 4\nSUB R0, R0, R1',
     },
   ],
 }

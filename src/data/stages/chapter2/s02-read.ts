@@ -5,7 +5,7 @@ export const stage2: Stage = {
   chapter: 2,
   order: 2,
   title: { ja: '値を読む', en: 'Read a Value' },
-  objective: { ja: 'メモリアドレス 0x10 の値を R1 に読み込め', en: 'Read the value at [0x10] into R1' },
+  objective: { ja: 'メモリアドレス 0x10 の値を R0 に読み込め', en: 'Read the value at [0x10] into R0' },
 
   initialMemory: [
     { address: 0x10, value: 7 },
@@ -13,7 +13,7 @@ export const stage2: Stage = {
   initialSource: '',
 
   successConditions: [
-    { type: 'register', target: 'R1', expected: 7 },
+    { type: 'register', target: 'R0', expected: 7 },
     { type: 'instruction_used', op: 'LOAD' },
   ],
 
@@ -49,18 +49,18 @@ Non-volatile storage is a thought for another day.`,
   hints: [
     {
       kind: 'hint',
-      ja: 'LOAD 命令を使います。\nメモリの「住所」を指定して、レジスタに値を読み込みます。\n\n例: LOAD R1, [0x10]',
-      en: 'Use LOAD.\nSpecify the memory address and read its value into a register.\n\nExample: LOAD R1, [0x10]',
+      ja: 'LOAD 命令を使います。\nメモリの「住所」を指定して、レジスタに値を読み込みます。\n\n例: LOAD R0, [0x10]',
+      en: 'Use LOAD.\nSpecify the memory address and read its value into a register.\n\nExample: LOAD R0, [0x10]',
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語             // アセンブラ\nint x = mem[0x10]; → LOAD R1, [0x10]\n\nメモリは初期状態で [0x10] = 7 になっています。',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                // Assembly\nint x = mem[0x10]; → LOAD R1, [0x10]\n\nMemory starts with [0x10] = 7.',
+      ja: 'C言語との対応はこうなります：\n\n// C言語             // アセンブラ\nint x = mem[0x10]; → LOAD R0, [0x10]\n\nメモリは初期状態で [0x10] = 7 になっています。',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                // Assembly\nint x = mem[0x10]; → LOAD R0, [0x10]\n\nMemory starts with [0x10] = 7.',
     },
     {
       kind: 'answer',
-      ja: 'LOAD R1, [0x10]',
-      en: 'LOAD R1, [0x10]',
+      ja: 'LOAD R0, [0x10]',
+      en: 'LOAD R0, [0x10]',
     },
   ],
 }

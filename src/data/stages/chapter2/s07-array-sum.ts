@@ -5,14 +5,14 @@ export const stage7: Stage = {
   chapter: 2,
   order: 7,
   title: { ja: '配列を読む', en: 'Read an Array' },
-  objective: { ja: 'R2 が指す配列の 3 要素を合計し、[0x30] に保存せよ', en: 'Sum the 3 elements pointed to by R2, store the result at [0x30]' },
+  objective: { ja: 'R0 が指す配列の 3 要素を合計し、[0x30] に保存せよ', en: 'Sum the 3 elements pointed to by R0, store the result at [0x30]' },
 
   initialMemory: [
     { address: 0x20, value: 11 },
     { address: 0x21, value: 22 },
     { address: 0x22, value: 33 },
   ],
-  initialSource: 'MOV R2, 0x20\n',
+  initialSource: 'MOV R0, 0x20\n',
 
   successConditions: [
     { type: 'memory', address: 0x30, expected: 66 },
@@ -29,9 +29,9 @@ export const stage7: Stage = {
         body: `配列の要素を 1 つずつ読み、合計を作る。
 今は 3 つだから、3 回 LOAD すればいい。
 
-  LOAD R3, [R2]       ; 1 番目
-  LOAD R4, [R2 + 1]   ; 2 番目
-  LOAD R0, [R2 + 2]   ; 3 番目
+  LOAD R1, [R0]       ; 1 番目
+  LOAD R2, [R0 + 1]   ; 2 番目
+  LOAD R3, [R0 + 2]   ; 3 番目
 
 しかし、もし要素が 100 個だったら？
 100 回書くのは、さすがに違う気がする。
@@ -47,9 +47,9 @@ export const stage7: Stage = {
         body: `Read each element of the array, build a sum.
 With three elements, three LOADs are enough.
 
-  LOAD R3, [R2]       ; first
-  LOAD R4, [R2 + 1]   ; second
-  LOAD R0, [R2 + 2]   ; third
+  LOAD R1, [R0]       ; first
+  LOAD R2, [R0 + 1]   ; second
+  LOAD R3, [R0 + 2]   ; third
 
 But what if there were a hundred?
 Writing the same thing a hundred times feels wrong.
@@ -70,13 +70,13 @@ Three is manageable. I worry a little about myself when it reaches ten.`
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語                              // アセンブラ\nint *p = ...;                   →     MOV   R2, 0x20       ; R2 が p\nint sum = p[0] + p[1] + p[2];   →     LOAD  R3, [R2]\n                                      LOAD  R4, [R2 + 1]\n                                      LOAD  R0, [R2 + 2]\n                                      ADD   R3, R3, R4\n                                      ADD   R3, R3, R0\nmem[0x30] = sum;                →     STORE R3, [0x30]',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                                 // Assembly\nint *p = ...;                   →     MOV   R2, 0x20       ; R2 plays p\nint sum = p[0] + p[1] + p[2];   →     LOAD  R3, [R2]\n                                      LOAD  R4, [R2 + 1]\n                                      LOAD  R0, [R2 + 2]\n                                      ADD   R3, R3, R4\n                                      ADD   R3, R3, R0\nmem[0x30] = sum;                →     STORE R3, [0x30]',
+      ja: 'C言語との対応はこうなります：\n\n// C言語                              // アセンブラ\nint *p = ...;                   →     MOV   R0, 0x20       ; R0 が p\nint sum = p[0] + p[1] + p[2];   →     LOAD  R1, [R0]\n                                      LOAD  R2, [R0 + 1]\n                                      LOAD  R3, [R0 + 2]\n                                      ADD   R1, R1, R2\n                                      ADD   R1, R1, R3\nmem[0x30] = sum;                →     STORE R1, [0x30]',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                                 // Assembly\nint *p = ...;                   →     MOV   R0, 0x20       ; R0 plays p\nint sum = p[0] + p[1] + p[2];   →     LOAD  R1, [R0]\n                                      LOAD  R2, [R0 + 1]\n                                      LOAD  R3, [R0 + 2]\n                                      ADD   R1, R1, R2\n                                      ADD   R1, R1, R3\nmem[0x30] = sum;                →     STORE R1, [0x30]',
     },
     {
       kind: 'answer',
-      ja: 'MOV   R2, 0x20\nLOAD  R3, [R2]\nLOAD  R4, [R2 + 1]\nLOAD  R0, [R2 + 2]\nADD   R3, R3, R4\nADD   R3, R3, R0\nSTORE R3, [0x30]',
-      en: 'MOV   R2, 0x20\nLOAD  R3, [R2]\nLOAD  R4, [R2 + 1]\nLOAD  R0, [R2 + 2]\nADD   R3, R3, R4\nADD   R3, R3, R0\nSTORE R3, [0x30]',
+      ja: 'MOV   R0, 0x20\nLOAD  R1, [R0]\nLOAD  R2, [R0 + 1]\nLOAD  R3, [R0 + 2]\nADD   R1, R1, R2\nADD   R1, R1, R3\nSTORE R1, [0x30]',
+      en: 'MOV   R0, 0x20\nLOAD  R1, [R0]\nLOAD  R2, [R0 + 1]\nLOAD  R3, [R0 + 2]\nADD   R1, R1, R2\nADD   R1, R1, R3\nSTORE R1, [0x30]',
     },
   ],
 }

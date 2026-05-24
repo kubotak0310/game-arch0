@@ -40,7 +40,7 @@ const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RE
         }"
       >
         <span class="reg-name">{{ name }}</span>
-        <span v-if="name === 'R1' && showReturnBadge" class="badge-return">戻り値</span>
+        <span v-if="name === 'R0' && showReturnBadge" class="badge-return">戻り値</span>
         <div class="reg-values">
           <span v-if="highlighted.has(name) && prevRegValue(name) !== null" class="reg-prev">
             {{ formatHex(prevRegValue(name)!) }} →

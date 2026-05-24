@@ -5,13 +5,13 @@ export const stage9: Stage = {
   chapter: 3,
   order: 9,
   title: { ja: 'ネストした関数', en: 'Nested Function Calls' },
-  objective: { ja: 'main から outer を呼び、outer の中で inner を呼んで、R3 を 43 にせよ', en: 'Call outer from main; outer calls inner. R3 should end as 43' },
+  objective: { ja: 'main から outer を呼び、outer の中で inner を呼んで、R0 を 43 にせよ', en: 'Call outer from main; outer calls inner. R0 should end as 43' },
 
   initialMemory: [],
-  initialSource: 'JMP main\n\ninner:\nMOV R3, 42\nRET\n\n; outer は inner を呼ぶ。main に戻れるよう、LR を保存する必要がある。\nouter:\n\nmain:\nCALL outer\n',
+  initialSource: 'JMP main\n\ninner:\nMOV R0, 42\nRET\n\n; outer は inner を呼ぶ。main に戻れるよう、LR を保存する必要がある。\nouter:\n\nmain:\nCALL outer\n',
 
   successConditions: [
-    { type: 'register', target: 'R3', expected: 43 },
+    { type: 'register', target: 'R0', expected: 43 },
     { type: 'instruction_used', op: 'CALL' },
     { type: 'instruction_used', op: 'PUSH' },
     { type: 'instruction_used', op: 'POP' },
@@ -27,13 +27,13 @@ export const stage9: Stage = {
     },
     {
       kind: 'hint',
-      ja: 'outer の中身はこうなります：\n\n// C言語                                // アセンブラ\nvoid outer() {                    →    outer:\n    // LR を退避（CALL で壊れる）        →      PUSH LR\n    inner();                      →      CALL inner\n    r3 += 1;                      →      ADD R3, R3, 1\n    // LR を復元                          →      POP LR\n}                                 →      RET\n\nmain の CALL outer の後には HALT を忘れずに。',
-      en: 'The body of outer:\n\n// C                                    // Assembly\nvoid outer() {                    →    outer:\n    // save LR (CALL will overwrite)  →      PUSH LR\n    inner();                      →      CALL inner\n    r3 += 1;                      →      ADD R3, R3, 1\n    // restore LR                       →      POP LR\n}                                 →      RET\n\nDon\'t forget HALT after CALL outer in main.',
+      ja: 'outer の中身はこうなります：\n\n// C言語                                // アセンブラ\nvoid outer() {                    →    outer:\n    // LR を退避（CALL で壊れる）        →      PUSH LR\n    inner();                      →      CALL inner\n    r0 += 1;                      →      ADD R0, R0, 1\n    // LR を復元                          →      POP LR\n}                                 →      RET\n\nmain の CALL outer の後には HALT を忘れずに。',
+      en: 'The body of outer:\n\n// C                                    // Assembly\nvoid outer() {                    →    outer:\n    // save LR (CALL will overwrite)  →      PUSH LR\n    inner();                      →      CALL inner\n    r0 += 1;                      →      ADD R0, R0, 1\n    // restore LR                       →      POP LR\n}                                 →      RET\n\nDon\'t forget HALT after CALL outer in main.',
     },
     {
       kind: 'answer',
-      ja: 'JMP main\n\ninner:\nMOV R3, 42\nRET\n\nouter:\nPUSH LR\nCALL inner\nADD R3, R3, 1\nPOP LR\nRET\n\nmain:\nCALL outer\nHALT',
-      en: 'JMP main\n\ninner:\nMOV R3, 42\nRET\n\nouter:\nPUSH LR\nCALL inner\nADD R3, R3, 1\nPOP LR\nRET\n\nmain:\nCALL outer\nHALT',
+      ja: 'JMP main\n\ninner:\nMOV R0, 42\nRET\n\nouter:\nPUSH LR\nCALL inner\nADD R0, R0, 1\nPOP LR\nRET\n\nmain:\nCALL outer\nHALT',
+      en: 'JMP main\n\ninner:\nMOV R0, 42\nRET\n\nouter:\nPUSH LR\nCALL inner\nADD R0, R0, 1\nPOP LR\nRET\n\nmain:\nCALL outer\nHALT',
     },
   ],
 }

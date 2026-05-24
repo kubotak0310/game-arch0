@@ -25,33 +25,33 @@ export const stage8: Stage = {
   interlude: {
     ja: [
       {
-        body: `第 1 章で R1 と R2 を入れ替えた。あの時と同じ理屈だ。
+        body: `第 1 章で R0 と R1 を入れ替えた。あの時と同じ理屈だ。
 直接交換はできない。第 3 の場所が要る。
 
 ただし今度はメモリだ。
 2 つのメモリアドレスを入れ替えるには、
 両方の値を一度レジスタへ持ち上げる必要がある。
 
-  LOAD  R1, [0x10]
-  LOAD  R2, [0x20]
-  STORE R2, [0x10]
-  STORE R1, [0x20]
+  LOAD  R0, [0x10]
+  LOAD  R1, [0x20]
+  STORE R1, [0x10]
+  STORE R0, [0x20]
 
 レジスタは「中継地点」として働く。`,
       },
     ],
     en: [
       {
-        body: `In chapter 1, R1 and R2 were swapped. The same idea here.
+        body: `In chapter 1, R0 and R1 were swapped. The same idea here.
 You cannot exchange directly. A third place is required.
 
 Only now the third place is a register, and the two ends are memory.
 Both values must be lifted into registers first.
 
-  LOAD  R1, [0x10]
-  LOAD  R2, [0x20]
-  STORE R2, [0x10]
-  STORE R1, [0x20]
+  LOAD  R0, [0x10]
+  LOAD  R1, [0x20]
+  STORE R1, [0x10]
+  STORE R0, [0x20]
 
 The registers serve as the waypoint.`,
       },
@@ -66,13 +66,13 @@ The registers serve as the waypoint.`,
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語                          // アセンブラ\nint a = mem[0x10];          →     LOAD  R1, [0x10]\nint b = mem[0x20];          →     LOAD  R2, [0x20]\nmem[0x10] = b;              →     STORE R2, [0x10]\nmem[0x20] = a;              →     STORE R1, [0x20]',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                             // Assembly\nint a = mem[0x10];          →     LOAD  R1, [0x10]\nint b = mem[0x20];          →     LOAD  R2, [0x20]\nmem[0x10] = b;              →     STORE R2, [0x10]\nmem[0x20] = a;              →     STORE R1, [0x20]',
+      ja: 'C言語との対応はこうなります：\n\n// C言語                          // アセンブラ\nint a = mem[0x10];          →     LOAD  R0, [0x10]\nint b = mem[0x20];          →     LOAD  R1, [0x20]\nmem[0x10] = b;              →     STORE R1, [0x10]\nmem[0x20] = a;              →     STORE R0, [0x20]',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                             // Assembly\nint a = mem[0x10];          →     LOAD  R0, [0x10]\nint b = mem[0x20];          →     LOAD  R1, [0x20]\nmem[0x10] = b;              →     STORE R1, [0x10]\nmem[0x20] = a;              →     STORE R0, [0x20]',
     },
     {
       kind: 'answer',
-      ja: 'LOAD  R1, [0x10]\nLOAD  R2, [0x20]\nSTORE R2, [0x10]\nSTORE R1, [0x20]',
-      en: 'LOAD  R1, [0x10]\nLOAD  R2, [0x20]\nSTORE R2, [0x10]\nSTORE R1, [0x20]',
+      ja: 'LOAD  R0, [0x10]\nLOAD  R1, [0x20]\nSTORE R1, [0x10]\nSTORE R0, [0x20]',
+      en: 'LOAD  R0, [0x10]\nLOAD  R1, [0x20]\nSTORE R1, [0x10]\nSTORE R0, [0x20]',
     },
   ],
 }

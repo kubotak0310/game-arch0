@@ -57,13 +57,13 @@ The machine only knows how to copy.`
     },
     {
       kind: 'hint',
-      ja: 'C言語との対応はこうなります：\n\n// C言語                    // アセンブラ\nmem[0x20] = mem[0x10];  →  LOAD  R1, [0x10]\n                           STORE R1, [0x20]',
-      en: 'Here is the C-to-assembly mapping:\n\n// C                       // Assembly\nmem[0x20] = mem[0x10];  →  LOAD  R1, [0x10]\n                           STORE R1, [0x20]',
+      ja: 'C言語との対応はこうなります：\n\n// C言語                    // アセンブラ\nmem[0x20] = mem[0x10];  →  LOAD  R0, [0x10]\n                           STORE R0, [0x20]',
+      en: 'Here is the C-to-assembly mapping:\n\n// C                       // Assembly\nmem[0x20] = mem[0x10];  →  LOAD  R0, [0x10]\n                           STORE R0, [0x20]',
     },
     {
       kind: 'answer',
-      ja: 'LOAD R1, [0x10]\nSTORE R1, [0x20]',
-      en: 'LOAD R1, [0x10]\nSTORE R1, [0x20]',
+      ja: 'LOAD R0, [0x10]\nSTORE R0, [0x20]',
+      en: 'LOAD R0, [0x10]\nSTORE R0, [0x20]',
     },
   ],
 }

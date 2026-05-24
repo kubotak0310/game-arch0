@@ -83,13 +83,13 @@ The answer waits in the next chapter.`,
     },
     {
       kind: 'hint',
-      ja: 'ベースアドレスをレジスタに入れておくと、オフセットで楽に書けます：\n\nMOV   R2, 0x20       ; 元配列のベース\nMOV   R3, 0x30       ; 先配列のベース\nLOAD  R1, [R2]\nSTORE R1, [R3]\nLOAD  R1, [R2 + 1]\nSTORE R1, [R3 + 1]\nLOAD  R1, [R2 + 2]\nSTORE R1, [R3 + 2]',
-      en: 'Keep the base address in a register to use offsets cleanly:\n\nMOV   R2, 0x20       ; source base\nMOV   R3, 0x30       ; destination base\nLOAD  R1, [R2]\nSTORE R1, [R3]\nLOAD  R1, [R2 + 1]\nSTORE R1, [R3 + 1]\nLOAD  R1, [R2 + 2]\nSTORE R1, [R3 + 2]',
+      ja: 'ベースアドレスをレジスタに入れておくと、オフセットで楽に書けます：\n\nMOV   R1, 0x20       ; 元配列のベース\nMOV   R2, 0x30       ; 先配列のベース\nLOAD  R0, [R1]\nSTORE R0, [R2]\nLOAD  R0, [R1 + 1]\nSTORE R0, [R2 + 1]\nLOAD  R0, [R1 + 2]\nSTORE R0, [R2 + 2]',
+      en: 'Keep the base address in a register to use offsets cleanly:\n\nMOV   R1, 0x20       ; source base\nMOV   R2, 0x30       ; destination base\nLOAD  R0, [R1]\nSTORE R0, [R2]\nLOAD  R0, [R1 + 1]\nSTORE R0, [R2 + 1]\nLOAD  R0, [R1 + 2]\nSTORE R0, [R2 + 2]',
     },
     {
       kind: 'answer',
-      ja: 'MOV   R2, 0x20\nMOV   R3, 0x30\nLOAD  R1, [R2]\nSTORE R1, [R3]\nLOAD  R1, [R2 + 1]\nSTORE R1, [R3 + 1]\nLOAD  R1, [R2 + 2]\nSTORE R1, [R3 + 2]',
-      en: 'MOV   R2, 0x20\nMOV   R3, 0x30\nLOAD  R1, [R2]\nSTORE R1, [R3]\nLOAD  R1, [R2 + 1]\nSTORE R1, [R3 + 1]\nLOAD  R1, [R2 + 2]\nSTORE R1, [R3 + 2]',
+      ja: 'MOV   R1, 0x20\nMOV   R2, 0x30\nLOAD  R0, [R1]\nSTORE R0, [R2]\nLOAD  R0, [R1 + 1]\nSTORE R0, [R2 + 1]\nLOAD  R0, [R1 + 2]\nSTORE R0, [R2 + 2]',
+      en: 'MOV   R1, 0x20\nMOV   R2, 0x30\nLOAD  R0, [R1]\nSTORE R0, [R2]\nLOAD  R0, [R1 + 1]\nSTORE R0, [R2 + 1]\nLOAD  R0, [R1 + 2]\nSTORE R0, [R2 + 2]',
     },
   ],
 }
