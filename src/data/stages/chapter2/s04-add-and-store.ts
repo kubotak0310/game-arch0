@@ -31,9 +31,7 @@ export const stage4: Stage = {
 メモリから読み、レジスタの中で計算し、メモリへ戻す。
 これを何度も繰り返すことで、複雑な処理が成立する。
 
-ARCH-0 はその最小の形を見せている。`,
-        marginNote: `読んで、計算して、書く。
-この 3 手順から外れる仕事を、私は思いつけない。`,
+ARCH-0 はその最小の形を見せている。`
       },
     ],
     en: [
@@ -45,9 +43,7 @@ ARCH-0 はその最小の形を見せている。`,
 Read from memory, compute in a register, write back to memory.
 Repeating this is what makes complex processing work.
 
-ARCH-0 shows that shape at its smallest.`,
-        marginNote: `Read, compute, write.
-I cannot think of a task that falls outside these three.`,
+ARCH-0 shows that shape at its smallest.`
       },
     ],
   },

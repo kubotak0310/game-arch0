@@ -34,9 +34,7 @@ LOAD で読み、CMP で比べ、分岐で道を選ぶ。
   次の値と比べ、大きければ更新する。
   これを全要素について繰り返す。
 
-3 つだから、比較は 2 回で済む。`,
-        marginNote: `比べるには、基準がいる。
-1 つ目の値を仮の答えにする — なかなか潔い。`,
+3 つだから、比較は 2 回で済む。`
       },
     ],
     en: [
@@ -50,9 +48,7 @@ To find the maximum:
   Compare with the next, update if it's larger.
   Repeat for each element.
 
-Three elements means only two comparisons.`,
-        marginNote: `Comparison needs a baseline.
-Taking the first as a provisional answer — clean, I think.`,
+Three elements means only two comparisons.`
       },
     ],
   },

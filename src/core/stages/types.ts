@@ -15,7 +15,6 @@ export interface NotePage {
   date?: string
   body: string
   diagram?: DiagramType
-  marginNote?: string
 }
 
 export interface NoteInterlude {

@@ -33,9 +33,7 @@ export const stage10: Stage = {
 増えてもいない。同じ数字が、別の場所に現れるだけだ。
 
 これが、計算機の素直さでもある。
-人の記憶は、思い出すたびに少しずつ書き換わるという。`,
-        marginNote: `このノートが、誰かの手に届いたとして。
-その人は、これを読んだことを誰かに話すだろうか。`,
+人の記憶は、思い出すたびに少しずつ書き換わるという。`
       },
       {
         body: `章の最後の問題だ。
@@ -56,9 +54,7 @@ Duplicating a value in memory takes nothing from the source.
 Nothing is added either. The same number appears in a second place.
 
 This is the machine's honesty.
-Human memory, they say, is rewritten a little each time it's recalled.`,
-        marginNote: `If this notebook ever reached someone.
-Would they tell anyone they had read it?`,
+Human memory, they say, is rewritten a little each time it's recalled.`
       },
       {
         body: `The last problem of the chapter.

@@ -1,0 +1,1 @@
+{"root":["./src/core/assembler/lexer.ts","./src/core/assembler/parser.ts","./src/core/assembler/types.ts","./src/core/cpu/cpu.ts","./src/core/cpu/instructions.ts","./src/core/cpu/memory.ts","./src/core/cpu/types.ts","./src/core/stages/types.ts","./tests/core/assembler.test.ts","./tests/core/cpu.test.ts"],"errors":true,"version":"6.0.3"}

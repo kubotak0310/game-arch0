@@ -40,9 +40,7 @@ R2 の値を 0x30 から 0x38 に変えれば、
 LOAD R1, [R2] は別の場所から読み始める。
 
 「どこを読むか」を、実行時に決められる。
-これが、配列やループの土台になる。`,
-        marginNote: `住所を変数にする、という発想。
-これを初めて思いついたとき、どこか背筋が伸びた。`,
+これが、配列やループの土台になる。`
       },
     ],
     en: [
@@ -65,9 +63,7 @@ Change R2 from 0x30 to 0x38,
 and LOAD R1, [R2] reads from somewhere else.
 
 You decide where to read at runtime, not before.
-This is the ground beneath arrays and loops.`,
-        marginNote: `The idea of treating an address as a variable.
-When I first grasped it, something clicked.`,
+This is the ground beneath arrays and loops.`
       },
     ],
   },

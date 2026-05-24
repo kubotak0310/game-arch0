@@ -46,9 +46,7 @@ STORE R1, [0x10]  → R1 の値をメモリへ書く
 LOAD  R1, [0x10]  → メモリの値を R1 へ読む
 
 [ ] の中がアドレスだ。
-数値でも、レジスタでも指定できる。`,
-        marginNote: `書いたものは、残る。
-読む人が現れるまで、ずっとそこにある。`,
+数値でも、レジスタでも指定できる。`
       },
     ],
     en: [
@@ -79,9 +77,7 @@ STORE R1, [0x10]  → write R1 into memory
 LOAD  R1, [0x10]  → read from memory into R1
 
 The address goes inside [ ].
-It can be a number or a register.`,
-        marginNote: `What is written stays.
-It waits there until someone reads it.`,
+It can be a number or a register.`
       },
     ],
   },
