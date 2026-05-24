@@ -83,7 +83,8 @@ src/views/          ← Vue ページ（未作成）
 
 ### 型の制約
 
-- `Registers.R0: 0` はリテラル型 — `setRegister()` で R0 への書き込みは無条件に破棄（[instructions.ts](src/core/cpu/instructions.ts)）
+- 汎用レジスタは R0〜R4 の5本（[types.ts](src/core/cpu/types.ts)）。R0=0 ルールは Phase 4 で廃止（経緯は ARCH0_SPEC.md §3-1 参照）
+- 呼び出し規約：R0/R1 が引数・戻り値（caller-saved）、R2 が caller-saved スクラッチ、R3/R4 が callee-saved
 - すべての値は書き込み時に `& 0xFFFF` でマスク
 - `CpuSnapshot.memory` は常に**コピー**（`new Uint16Array(...)`）— 参照渡し禁止
 - `ParseError.message` は必ず `{ ja: string; en: string }` の両言語セット
