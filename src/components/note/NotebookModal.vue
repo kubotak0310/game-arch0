@@ -58,6 +58,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
             <DiagramChain v-if="page.diagram === 'chain'" />
             <DiagramSwap v-if="page.diagram === 'swap'" />
             <DiagramLoop v-if="page.diagram === 'loop'" />
+            <div v-if="page.marginNote" class="nb-margin-note">{{ page.marginNote }}</div>
           </div>
         </template>
       </div>
@@ -215,6 +216,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
   white-space: pre-wrap;
   word-break: break-word;
   letter-spacing: 0.01em;
+}
+
+.nb-margin-note {
+  font-family: 'Caveat', cursive;
+  font-size: 17px;
+  color: #1A3A6A;
+  line-height: 1.55;
+  margin-top: 20px;
+  padding: 2px 0 2px 12px;
+  border-left: 2px solid rgba(26, 58, 106, 0.35);
+  white-space: pre-wrap;
+  display: inline-block;
+  transform: rotate(-0.8deg);
+  transform-origin: left center;
 }
 
 /* 空状態 */

@@ -34,6 +34,8 @@ export const stage10: Stage = {
 
 これが、計算機の素直さでもある。
 人の記憶は、思い出すたびに少しずつ書き換わるという。`,
+        marginNote: `このノートが、誰かの手に届いたとして。
+その人は、これを読んだことを誰かに話すだろうか。`,
       },
       {
         body: `章の最後の問題だ。
@@ -55,6 +57,8 @@ Nothing is added either. The same number appears in a second place.
 
 This is the machine's honesty.
 Human memory, they say, is rewritten a little each time it's recalled.`,
+        marginNote: `If this notebook ever reached someone.
+Would they tell anyone they had read it?`,
       },
       {
         body: `The last problem of the chapter.
