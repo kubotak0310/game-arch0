@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 「R1 と R2 の値を入れ替える」スワップ手順を 3 ステップで示す手書き風 SVG 図解。
+ * テンポラリレジスタが必要であることを学習者に直感的に伝えるためのもの。
+ */
 import { onMounted, ref } from 'vue'
 import rough from 'roughjs'
 import { INK, MUTED, BASE, txt } from './diagramUtils.ts'

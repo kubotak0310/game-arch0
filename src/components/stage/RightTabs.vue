@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 画面右側のタブパネル。
+ * 「メモリ・スタック」と「ヒント」を切り替える。ステージ移動時はデフォルトのメモリタブに戻す。
+ */
 import { ref, watch } from 'vue'
 import MemoryView from '../cpu/MemoryView.vue'
 import StackView from '../cpu/StackView.vue'
@@ -12,7 +16,7 @@ const props = defineProps<{
 
 const tab = ref<'memory' | 'hint'>('memory')
 
-// ステージ移動時はデフォルトの「メモリ・スタック」タブに戻す
+// ステージを切り替えたら必ず「メモリ・スタック」に戻す（前ステージのヒント開示状態を持ち越さないため）
 watch(() => props.stageId, () => {
   tab.value = 'memory'
 })

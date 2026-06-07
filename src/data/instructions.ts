@@ -1,7 +1,16 @@
+/**
+ * 命令ごとの構文と短い解説を集めた辞書。
+ *
+ * `StageHeader` の使用命令チップのホバーツールチップなど、UI 上でユーザーに
+ * 命令の意味を即座に思い出させる場面で参照される。
+ * 実行ロジックには関与しないため、文言のみここで一元管理する。
+ */
 import type { InstructionType } from '../core/cpu/types.ts'
 
 export interface InstructionInfo {
+  /** 命令の構文サンプル（オペランドの型を含めて表記）。 */
   syntax: string
+  /** 命令の挙動を短い日本語で説明。 */
   desc: string
 }
 
@@ -32,6 +41,10 @@ export const INSTRUCTION_INFO: Record<InstructionType, InstructionInfo> = {
   HALT:  { syntax: 'HALT',                   desc: 'プログラムを停止' },
 }
 
+/**
+ * 命令名から情報を取得する。未知のニーモニックでも安全に呼べるよう、
+ * 該当エントリがなければ「構文 = ニーモニック名のみ・説明なし」のフォールバックを返す。
+ */
 export function getInstructionInfo(op: string): InstructionInfo {
   return INSTRUCTION_INFO[op as InstructionType] ?? { syntax: op, desc: '' }
 }

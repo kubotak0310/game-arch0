@@ -1,4 +1,13 @@
 <script setup lang="ts">
+/**
+ * 「ノート」モーダル。
+ *
+ * 既読インタールード（ステージクリア時に得たノートページ）を 1 冊にまとめ、
+ * ステージ単位で章タイトル付きで通読できる UI を提供する。
+ * 紙の風合い・赤の罫線・パンチ穴の装飾を CSS で再現している。
+ *
+ * `currentStageId` を渡すと、開いた瞬間にそのステージへスクロールする。
+ */
 import { onMounted, onBeforeUnmount, nextTick } from 'vue'
 import type { Stage, NotePage } from '../../core/stages/types.ts'
 import DiagramRegister from './DiagramRegister.vue'
@@ -15,6 +24,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ close: [] }>()
 
+/** Esc キーで閉じる。モーダル外クリックでも閉じる（テンプレート側 @click.self）。 */
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') { e.preventDefault(); emit('close') }
 }
@@ -22,6 +32,7 @@ function handleKeydown(e: KeyboardEvent) {
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
   if (props.currentStageId) {
+    // 該当ステージ見出しまで自動スクロール（DOM 反映を待つため nextTick）
     nextTick(() => {
       const el = document.getElementById(`nb-stage-${props.currentStageId}`)
       el?.scrollIntoView({ block: 'start' })

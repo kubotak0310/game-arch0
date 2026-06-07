@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 実行ボタン群（戻る / ステップ / 実行 / リセット）と、F9/F10 キーバインドを提供するコンポーネント。
+ * 状態は `useExecutionStore` に委譲し、本コンポーネントはイベント受け渡しに専念する。
+ */
 import { onMounted, onBeforeUnmount } from 'vue'
 import { useExecutionStore } from '../../stores/execution.ts'
 import { useCpuStore } from '../../stores/cpu.ts'
@@ -19,6 +23,10 @@ function handleReset() {
   execStore.reset()
 }
 
+/**
+ * F9 / F10 のグローバルショートカット。
+ * F10 で 1 ステップ進める（VS Code 等のステップオーバーと同じ流儀）、F9 で 1 ステップ戻す。
+ */
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'F10') {
     e.preventDefault()

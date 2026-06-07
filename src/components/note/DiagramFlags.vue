@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * N/Z/C/V 4 フラグを並べたチェックボックス風の手書き SVG 図解。
+ * 第2章の比較・分岐インタールードで挿入する。
+ */
 import { onMounted, ref } from 'vue'
 import rough from 'roughjs'
 

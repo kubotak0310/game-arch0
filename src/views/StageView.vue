@@ -1,4 +1,17 @@
 <script setup lang="ts">
+/**
+ * ステージプレイ画面のルートビュー。
+ *
+ * 3 カラムレイアウト：
+ * - 左：CodeEditor（コードを書く）
+ * - 中：CPU 状態（レジスタ・フラグ・制御レジスタ）＋ TaskPanel（クリア条件）
+ * - 右：メモリ／スタック または ヒント（タブ切替）
+ *
+ * 主な責務：
+ * - 全章ステージを連結したフラットなインデックス（`currentStageIndex`）の管理
+ * - ステージ切替時の CPU 初期化と初期ソース投入
+ * - クリア検知 → ClearModal 表示／インタールード表示／オープニングカード
+ */
 import { ref, computed, watch, onMounted } from 'vue'
 import { useDebugMode } from '../composables/useDebugMode.ts'
 import CodeEditor from '../components/editor/CodeEditor.vue'
@@ -41,6 +54,10 @@ interface ChapterGroup {
   stages: ChapterStageInfo[]
 }
 
+/**
+ * ステージ一覧を章ごとにグループ化して、ヘッダーのインジケータに渡す。
+ * 章開始時のフラットインデックス（`firstIndex`）を持つことで「章ジャンプ可否」を簡単に判定できる。
+ */
 const chapterGroups = computed<ChapterGroup[]>(() => {
   const map = new Map<number, ChapterGroup>()
   allStages.forEach((stage, idx) => {
@@ -72,17 +89,20 @@ const notebookEntries = computed(() =>
     .map(s => ({ stage: s, pages: s.interlude!.ja }))
 )
 
+/** 当該ステージに未読インタールードがあれば表示状態にする（オープニング完了後・ステージ遷移後に呼ぶ）。 */
 function maybeShowInterlude() {
   const stage = currentStage.value
   showInterlude.value = !!stage.interlude && !progress.isInterludeSeen(stage.id)
 }
 
+/** インタールード閉じ。既読フラグを立て、以降は同じステージで再表示されなくする。 */
 function dismissInterlude() {
   darkBackdrop.value = false
   progress.markInterludeSeen(currentStage.value.id)
   showInterlude.value = false
 }
 
+// 初クリア検知：すでに過去にクリア済みのステージを再プレイしてもモーダルは出さない（祝賀は初回のみ）
 watch(() => cpuStore.isCleared, (cleared) => {
   if (cleared && !progress.isCleared(currentStage.value.id)) {
     progress.markCleared(currentStage.value.id)
@@ -102,6 +122,7 @@ const source = ref('')
 const copied = ref(false)
 let copyTimer: ReturnType<typeof setTimeout> | null = null
 
+/** 現在のソースをクリップボードにコピーし、1.2 秒間「Copied」ラベルを出す。 */
 async function copySource() {
   await navigator.clipboard.writeText(source.value)
   copied.value = true
@@ -110,10 +131,11 @@ async function copySource() {
 }
 
 onMounted(() => {
+  // 初回マウント時のみ：ステージの初期ソースをエディタとCPUに同時投入する。
+  // インタールードはオープニングカードの @after-leave で表示するため、ここでは触らない。
   const init = currentStage.value.initialSource ?? ''
   source.value = init
   cpuStore.loadStage(currentStage.value, init)
-  // インタールードはオープニングカードが消えた後に表示する
 })
 
 watch(currentStageIndex, () => {

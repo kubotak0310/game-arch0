@@ -1,13 +1,27 @@
+/**
+ * Diagram*.vue で共用する SVG 描画ヘルパー。
+ *
+ * 「ノートに手書きしたような図」を出すための共通スタイル定数と、
+ * SVG ノード生成・テキスト配置・矢印描画の薄いラッパーを提供する。
+ *
+ * 線の不揃いさは `roughness` / `bowing` で個別 Diagram 側が roughjs に渡す想定。
+ */
 export const INK = '#2e1f0e'
 export const MUTED = '#5a4020'
+/** roughjs に渡す共通スタイル。手書き風の濃さと揺らぎを統一する。 */
 export const BASE = { roughness: 1.5, stroke: INK, strokeWidth: 1.1, bowing: 0.8 }
 
 const NS = 'http://www.w3.org/2000/svg'
 
+/** 名前空間付きで SVG 要素を生成するショートカット。 */
 export function el(tag: string) {
   return document.createElementNS(NS, tag)
 }
 
+/**
+ * SVG にテキストノードを追加する。
+ * 既定で Caveat（手書きフォント）・センター揃え・本文インクカラー。
+ */
 export function txt(
   parent: SVGElement,
   content: string,
@@ -28,6 +42,10 @@ export function txt(
   parent.appendChild(node)
 }
 
+/**
+ * 矢印先端の `marker` 定義を SVG の <defs> に登録する。
+ * `arrow()` / `pathArrow()` を使う前に 1 度呼ぶ。
+ */
 export function arrowDefs(svg: SVGSVGElement, id = 'arr') {
   const defs = el('defs')
   const marker = el('marker')
@@ -45,6 +63,7 @@ export function arrowDefs(svg: SVGSVGElement, id = 'arr') {
   svg.appendChild(defs)
 }
 
+/** (x1,y1) → (x2,y2) の直線に矢印先端を付けて描く。 */
 export function arrow(parent: SVGElement, x1: number, y1: number, x2: number, y2: number, id = 'arr') {
   const line = el('line')
   line.setAttribute('x1', String(x1))
@@ -57,6 +76,7 @@ export function arrow(parent: SVGElement, x1: number, y1: number, x2: number, y2
   parent.appendChild(line)
 }
 
+/** SVG path 文字列を矢印付きで描く。曲線などに使う。 */
 export function pathArrow(parent: SVGElement, d: string, id = 'arr') {
   const path = el('path')
   path.setAttribute('d', d)

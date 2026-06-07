@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * N/Z/C/V フラグを 2x2 グリッドで表示するコンポーネント。
+ * `flagsActive` が false（CMP/分岐がまだ解放されていない章）のときは薄く dim 表示する。
+ */
 import { computed } from 'vue'
 import { useCpuStore } from '../../stores/cpu.ts'
 import { useActiveFeatures } from '../../composables/useActiveFeatures.ts'
@@ -8,6 +12,7 @@ const { flagsActive } = useActiveFeatures()
 
 const FLAGS = ['N', 'Z', 'C', 'V'] as const
 
+/** UI に併記する各フラグの意味（CPU 用語の補助）。 */
 const FLAG_DESC: Record<string, string> = {
   N: 'Negative',
   Z: 'Zero',
@@ -17,6 +22,7 @@ const FLAG_DESC: Record<string, string> = {
 
 const changedFlags = computed(() => new Set(cpuStore.lastResult?.changedFlags ?? []))
 
+/** ハイライト時に「変化前→変化後」を表示するため、前ステップの値を引く。 */
 const prevFlagValue = (flag: string): boolean | null => {
   const prev = cpuStore.previousSnapshot
   if (!prev) return null

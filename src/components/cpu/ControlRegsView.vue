@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 制御レジスタ（PC / SP / LR）を 3 行表示するコンポーネント。
+ * 直前のステップで変化したレジスタはアンバー色のハイライトで強調する。
+ */
 import { computed } from 'vue'
 import { useCpuStore } from '../../stores/cpu.ts'
 import { useActiveFeatures } from '../../composables/useActiveFeatures.ts'
@@ -6,11 +10,13 @@ import { useActiveFeatures } from '../../composables/useActiveFeatures.ts'
 const cpuStore = useCpuStore()
 const { stackActive, lrActive } = useActiveFeatures()
 
+/** 4桁ゼロ埋めの16進文字列に整形する（例: `0x00FE`）。 */
 function toHex(n: number): string {
   return '0x' + n.toString(16).toUpperCase().padStart(4, '0')
 }
 
-const pcChanged = computed(() => false) // PC always changes; show normally
+// PC は毎ステップ動くため、ハイライトを付けると常時光ってしまう。意図的に固定で false。
+const pcChanged = computed(() => false)
 const spChanged = computed(
   () => cpuStore.lastResult?.changedRegisters.includes('SP') ?? false,
 )

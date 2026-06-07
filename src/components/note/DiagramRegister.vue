@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * レジスタの「箱」を縦に並べた手書き風 SVG 図解。
+ * 第1章のレジスタ解説インタールードで挿入される。
+ */
 import { onMounted, ref } from 'vue'
 import rough from 'roughjs'
 

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * ループ（条件分岐で戻る流れ）を示す手書き風 SVG 図解。
+ * 第3章のループ解説で「ラベルに戻ってくる」概念を視覚化するために使う。
+ */
 import { onMounted, ref } from 'vue'
 import rough from 'roughjs'
 import { INK, MUTED, BASE, txt, arrowDefs, arrow, pathArrow } from './diagramUtils.ts'

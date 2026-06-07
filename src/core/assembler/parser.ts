@@ -1,3 +1,13 @@
+/**
+ * ARCH-0 アセンブラのパーサー（構文解析器）。
+ *
+ * `Token[]` を 2 パスで処理する：
+ * 1. **パス1**：ラベル位置を収集しつつ各行をパースして「生命令」リストを作る。
+ * 2. **パス2**：生命令内のラベル参照を命令インデックス（数値）に解決して `Instruction[]` を作る。
+ *
+ * このファイルは内部用に小さなクラス `TokenCursor` / `LineParser` を持つが、外には公開しない。
+ * 公開 API は `parse()` のみ。
+ */
 import type { Token } from './types.ts'
 import type {
   InstructionType,
@@ -8,7 +18,10 @@ import type {
   AnyRegisterName,
 } from '../cpu/types.ts'
 
-// タイポ修正候補を探すため編集距離（Levenshtein）を計算
+/**
+ * タイポ修正候補を探すための Levenshtein 編集距離。
+ * 文字列長 m, n に対し O(mn) の素朴 DP。ニーモニック名はせいぜい 5 文字程度なので十分高速。
+ */
 function editDistance(a: string, b: string): number {
   const m = a.length
   const n = b.length
@@ -36,6 +49,10 @@ const KNOWN_MNEMONICS: InstructionType[] = [
   'HALT',
 ]
 
+/**
+ * 未知の識別子に対し、最も近い既知ニーモニックを返す。
+ * 距離 2 を上限とする（それ以上離れていれば「もしかして」と提案しない）。
+ */
 function findSuggestion(typo: string): string | null {
   let best: string | null = null
   let bestDist = Infinity
@@ -49,11 +66,15 @@ function findSuggestion(typo: string): string | null {
   return bestDist <= 2 ? best : null
 }
 
+/** 文字列がレジスタ名か判定する型ガード。 */
 function isRegisterName(value: string): value is AnyRegisterName {
   return ['R0', 'R1', 'R2', 'R3', 'R4', 'LR', 'SP', 'PC'].includes(value)
 }
 
-// トークン列をパースするためのカーソル
+/**
+ * トークン列を 1 行単位で取り出すための単純なカーソル。
+ * `consumeLine()` で「次の NEWLINE / EOF まで」を 1 行として切り出し、その NEWLINE 自体は捨てる。
+ */
 class TokenCursor {
   private pos: number = 0
   constructor(private readonly tokens: Token[]) {}
@@ -68,18 +89,24 @@ class TokenCursor {
     return t
   }
 
-  // 現在行のトークンを全て取得してカーソルを NEWLINE/EOF の次に進める
+  /**
+   * 現在行のトークンを全て取得し、続く NEWLINE も読み飛ばしてカーソルを次行頭に置く。
+   * EOF に達した場合は EOF を消費せずに残し、上位ループの終了判定に使えるようにする。
+   */
   consumeLine(): Token[] {
     const line: Token[] = []
     while (this.peek().kind !== 'NEWLINE' && this.peek().kind !== 'EOF') {
       line.push(this.advance())
     }
-    if (this.peek().kind === 'NEWLINE') this.advance() // NEWLINE を消費
+    if (this.peek().kind === 'NEWLINE') this.advance()
     return line
   }
 }
 
-// 行内トークン列からオペランドを取り出す小さなパーサー
+/**
+ * 1 行分のトークン列を受け取り、オペランドを順に取り出すパーサー。
+ * エラーは共有の `errors` 配列に push する（呼び出し側が引き続き他の行も処理できるように）。
+ */
 class LineParser {
   private pos: number = 0
   constructor(
@@ -95,10 +122,10 @@ class LineParser {
     return this.tokens[this.pos++]
   }
 
+  /** 次トークンがレジスタなら消費して名前を返す。それ以外は null（エラーは呼び出し元で生成）。 */
   expectRegister(): AnyRegisterName | null {
     const t = this.peek()
     if (!t) {
-      // エラーは呼び出し元が追加
       return null
     }
     if (t.kind !== 'REGISTER') return null
@@ -106,6 +133,7 @@ class LineParser {
     return t.value as AnyRegisterName
   }
 
+  /** 次トークンが `,` であることを期待。なければエラーを積んで false。 */
   expectComma(lineNum: number): boolean {
     const t = this.peek()
     if (!t || t.kind !== 'COMMA') {
@@ -124,6 +152,18 @@ class LineParser {
     return true
   }
 
+  /**
+   * 1 個のオペランドをパースする。
+   *
+   * 対応形式：
+   * - レジスタ：`R0` `LR` など
+   * - 即値：`5` `0x10`（16bit 範囲外はエラー、負数は 2の補数で 0xFFFF にマスク）
+   * - 直接アドレス参照：`[0x10]`
+   * - レジスタ間接参照（オフセット有/無）：`[R1]` `[R1 + 4]`
+   * - ラベル参照：`allowLabel = true` のときのみ（ジャンプ系命令で使う）
+   *
+   * パース不能なら null を返し、必要に応じてエラーを `errors` に積む。
+   */
   parseOperand(lineNum: number, allowLabel = false): Operand | null {
     const t = this.peek()
     if (!t) return null
@@ -147,12 +187,13 @@ class LineParser {
         })
         return null
       }
+      // 負数は2の補数表現で16bitに格納する
       const masked = value < 0 ? (value + 65536) & 0xFFFF : value & 0xFFFF
       return { type: 'immediate', value: masked }
     }
 
     if (t.kind === 'LBRACKET') {
-      this.advance() // '['
+      this.advance()
       const next = this.peek()
 
       // [imm] — 直接アドレス指定: LOAD R1, [0x10]
@@ -228,21 +269,25 @@ class LineParser {
       return { type: 'memory_register', register: reg, offset: 0 }
     }
 
-    // ニーモニック名（add, subなど）もラベル名として使える
+    // ニーモニック名と同じ綴りのラベル（例: `add:`）も許容する
     if (allowLabel && (t.kind === 'LABEL_REF' || t.kind === 'MNEMONIC')) {
       this.advance()
       return { type: 'label', name: t.value }
     }
 
-    // 数値は lexer が IMMEDIATE として処理するので、ここには来ない
     return null
   }
 
+  /** 残りトークン数。デバッグや想定外パターン検出に使う想定。 */
   remaining(): number {
     return this.tokens.length - this.pos
   }
 }
 
+/**
+ * パス1 で作る中間表現。`operands` 内のラベル参照はまだ未解決の `label` 型のまま。
+ * パス2 で命令インデックスへ解決して `Instruction` に変換する。
+ */
 type RawInstruction = {
   type: InstructionType
   operands: Operand[]
@@ -250,6 +295,10 @@ type RawInstruction = {
   sourceText: string
 }
 
+/**
+ * 1 行のトークン列をパースして 1 命令を作る。
+ * 先頭が MNEMONIC でなければエラー。`allowedSet` で未開放命令を弾く。
+ */
 function parseLine(
   lineTokens: Token[],
   errors: ParseError[],
@@ -300,6 +349,10 @@ function parseLine(
   return { type: mnemonicStr, operands, sourceLine: lineNum, sourceText }
 }
 
+/**
+ * 命令ニーモニックごとに必要なオペランド構文を読み取り、`operands` 配列に積む。
+ * 各 case が「期待する形」を表す自己文書化的な構造になっている。
+ */
 function parseOperands(
   mnemonic: InstructionType,
   lp: LineParser,
@@ -597,6 +650,12 @@ function parseOperands(
   }
 }
 
+/**
+ * トークン列をパースして命令列・ラベル辞書・エラーを返す。
+ *
+ * `allowedInstructions` を渡すと、未開放のニーモニックを構文エラーとして弾く（章ごとの段階開放）。
+ * 未指定なら全命令を許可する。
+ */
 export function parse(
   tokens: Token[],
   allowedInstructions?: InstructionType[],
@@ -611,14 +670,14 @@ export function parse(
 
   const cursor = new TokenCursor(tokens)
 
-  // Pass 1: ラベル収集 + 命令リスト構築
+  // パス1：ラベル収集と「生命令」の構築。ラベル参照は label 型のまま残す。
   const rawInstructions: Array<RawInstruction | null> = []
 
   while (cursor.peek().kind !== 'EOF') {
     const lineTokens = cursor.consumeLine()
     if (lineTokens.length === 0) continue
 
-    // ラベル定義を先頭から収集（複数ラベルも対応）
+    // 同じ命令位置に複数ラベルが付くケースに対応（`loop: again: ADD ...` など）
     let i = 0
     while (i < lineTokens.length && lineTokens[i].kind === 'LABEL_DEF') {
       labels.set(lineTokens[i].value, rawInstructions.length)
@@ -626,9 +685,9 @@ export function parse(
     }
 
     const rest = lineTokens.slice(i)
-    if (rest.length === 0) continue // ラベルのみの行
+    if (rest.length === 0) continue // ラベルのみの行は次の命令位置を変えないだけで OK
 
-    // 未知ニーモニックのチェック
+    // 命令の先頭にあるのに MNEMONIC でない（= LABEL_REF として誤判定）→ タイポ提案を試みる
     if (rest[0].kind === 'LABEL_REF') {
       const typo = rest[0].value
       const suggestion = findSuggestion(typo)
@@ -655,7 +714,7 @@ export function parse(
     rawInstructions.push(raw)
   }
 
-  // Pass 2: ラベル参照を命令インデックスに解決
+  // パス2：label 型のオペランドを命令インデックス（immediate 値）に解決して最終命令列を作る。
   for (const raw of rawInstructions) {
     if (!raw) continue
     const resolved: Operand[] = raw.operands.map(op => {
@@ -669,7 +728,7 @@ export function parse(
               en: `Label '${op.name}' is not defined.`,
             },
           })
-          return op // そのまま残す（エラー済み）
+          return op // エラーは積み済み。op はそのまま残す
         }
         return { type: 'immediate', value: idx } as Operand
       }

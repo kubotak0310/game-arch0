@@ -1,4 +1,11 @@
 <script setup lang="ts">
+/**
+ * 初回起動時に表示する黒幕のオープニングカード。
+ *
+ * テキストが完全にフェードインする前にクリックされても無視するため、
+ * 1.6 秒経過後に `ready` を true にして以降の入力を受け付ける。
+ * 入力（キー押下またはクリック）で `done` を emit し、親側でステージ画面へ遷移する。
+ */
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const emit = defineEmits<{ done: [] }>()
@@ -11,6 +18,7 @@ function handleInput() {
 }
 
 onMounted(() => {
+  // テキストフェード完了の見計らい。短すぎると読まれずスキップされる
   setTimeout(() => { ready.value = true }, 1600)
   window.addEventListener('keydown', handleInput)
 })

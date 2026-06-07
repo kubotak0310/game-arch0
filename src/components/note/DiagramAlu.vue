@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * ALU（加算装置）の入出力イメージを表す手書き風 SVG 図解。
+ * `ADD R3, R1, R2` のような 3 オペランド命令の動きを直感的に説明するため使う。
+ */
 import { onMounted, ref } from 'vue'
 import rough from 'roughjs'
 import { INK, MUTED, BASE, txt, arrowDefs, arrow } from './diagramUtils.ts'

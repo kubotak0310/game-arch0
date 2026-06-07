@@ -1,4 +1,11 @@
 <script setup lang="ts">
+/**
+ * クリア条件一覧とパースエラーを表示するパネル。
+ *
+ * - 各クリア条件は実行結果に応じて自動でチェック状態に変わる。
+ * - パースエラーがあれば下部に行番号付きで表示し、`suggestion` も併記する。
+ * - 全条件達成時はパネル全体が緑色に切り替わる。
+ */
 import { computed } from 'vue'
 import { useCpuStore } from '../../stores/cpu.ts'
 import type { Stage, SuccessCondition } from '../../core/stages/types.ts'
@@ -9,6 +16,10 @@ const props = defineProps<{
 
 const cpuStore = useCpuStore()
 
+/**
+ * 単一の成功条件を判定する。
+ * `instruction_used` は常時判定できるが、それ以外は実行結果が無い段階では false を返す。
+ */
 function conditionMet(cond: SuccessCondition): boolean {
   if (cond.type === 'instruction_used') {
     return cpuStore.snapshot.instructionsUsed.includes(cond.op)
@@ -24,9 +35,11 @@ function conditionMet(cond: SuccessCondition): boolean {
   return false
 }
 
+/** 4桁ゼロ埋め16進。レジスタ値の表示用。 */
 function toHex4(n: number): string {
   return '0x' + n.toString(16).toUpperCase().padStart(4, '0')
 }
+/** 2桁ゼロ埋め16進。メモリアドレス表示用（ユーザー領域は2桁で足りる）。 */
 function toHex2(n: number): string {
   return '0x' + n.toString(16).toUpperCase().padStart(2, '0')
 }

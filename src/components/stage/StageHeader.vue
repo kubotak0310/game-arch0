@@ -1,4 +1,15 @@
 <script setup lang="ts">
+/**
+ * ステージ画面上部のヘッダー。
+ *
+ * 含む情報：
+ * - 章・ステージ名・課題テキスト
+ * - 使用すべき命令（クリア条件 `instruction_used`）のチップ列＋ホバーで構文ヘルプ
+ * - クリア／エラー／デバッグの状態バッジ
+ * - 右側に章ごとの進捗インジケータとステージドット（クリック可ナビゲーション）
+ *
+ * 親（`StageView`）が章・ステージ移動を実際に行うため、ここはイベントを emit するのみ。
+ */
 import { computed } from 'vue'
 import { useCpuStore } from '../../stores/cpu.ts'
 import { useProgressStore } from '../../stores/progress.ts'
@@ -56,6 +67,10 @@ const currentChapterStages = computed(() =>
   props.chapterGroups.find(g => g.chapter === props.stage.chapter)?.stages ?? []
 )
 
+/**
+ * 章インジケーターのアイコンを決める。
+ * 現在進行中=▶ / 過去（クリア済 or 現在位置より前）=✓ / 未到達=○。
+ */
 function chapterIcon(group: ChapterGroup): string {
   if (group.chapter === props.stage.chapter) return '▶'
   if (group.firstIndex < props.currentIndex || group.stages.every(s => isStageCleared(s.id))) return '✓'
@@ -72,6 +87,7 @@ function chapterStepClass(group: ChapterGroup): Record<string, boolean> {
   }
 }
 
+/** 章ジャンプの可否。通常は「現在位置以前」のみ、デバッグモードでは全章解放。 */
 function canAccessChapter(group: ChapterGroup): boolean {
   return isDebugMode.value || group.firstIndex <= props.currentIndex
 }

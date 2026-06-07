@@ -1,3 +1,9 @@
+/**
+ * アプリのエントリーポイント。
+ *
+ * Pinia には `pinia-plugin-persistedstate` を組み込み、`progress` ストア等の
+ * `persist: true` 指定で localStorage 永続化が有効になる。
+ */
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'

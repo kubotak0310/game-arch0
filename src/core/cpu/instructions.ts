@@ -1,8 +1,19 @@
 import type { Instruction, Operand, Registers, Flags, AnyRegisterName, RuntimeError } from './types.ts'
 import type { Memory } from './memory.ts'
 
+/**
+ * ステージで操作対象になる「ユーザー領域」のメモリ末尾アドレス。
+ * 0x40 以降は SP の初期位置（スタック領域）として暗黙に使うため、ユーザーが
+ * `LOAD` / `STORE` で触る想定の上限を区切る目的で公開している。
+ */
 export const USER_MEM_MAX = 0x3F
 
+/**
+ * 1ステップの実行中に破壊的に更新される CPU 状態。
+ *
+ * `executeInstruction()` は副作用を `state` に書き込み、呼び出し側（Cpu クラス）が
+ * スナップショットを取得して履歴に積む構成。`error` がセットされると以降の実行は停止する。
+ */
 export interface MutableCpuState {
   registers: Registers
   flags: Flags
@@ -14,6 +25,7 @@ export interface MutableCpuState {
   error?: RuntimeError
 }
 
+/** レジスタ名から現在値を取得する内部ヘルパー。 */
 function readRegister(state: MutableCpuState, name: AnyRegisterName): number {
   switch (name) {
     case 'R0': return state.registers.R0
@@ -35,6 +47,10 @@ function readRegOrImm(state: MutableCpuState, op: Operand): number {
   return 0
 }
 
+/**
+ * レジスタに値を書き込む。値は必ず 16bit にマスクする（仕様：オーバーフローは下位 16bit のみ保持）。
+ * PC / SP / LR の書き換えもここで一元化することで「次の PC」を任意に操作可能。
+ */
 export function setRegister(state: MutableCpuState, name: AnyRegisterName, value: number): void {
   const masked = value & 0xFFFF
   switch (name) {
@@ -49,6 +65,13 @@ export function setRegister(state: MutableCpuState, name: AnyRegisterName, value
   }
 }
 
+/**
+ * ADD 命令後のフラグ更新。
+ *
+ * - C（キャリー）：マスク前の `full` が 0xFFFF を超えていれば桁あふれ発生。
+ * - V（オーバーフロー）：符号なし演算と違い、両オペランドの符号が一致しているのに
+ *   結果の符号が反転した場合のみ「符号付きのはみ出し」が起きる。
+ */
 function updateFlagsAdd(state: MutableCpuState, a: number, b: number, result: number, full: number): void {
   const aSign = (a & 0x8000) !== 0
   const bSign = (b & 0x8000) !== 0
@@ -60,6 +83,12 @@ function updateFlagsAdd(state: MutableCpuState, a: number, b: number, result: nu
   state.flags.V = (!aSign && !bSign && rSign) || (aSign && bSign && !rSign)
 }
 
+/**
+ * SUB / CMP 命令後のフラグ更新。
+ *
+ * - C：ARM 系と同じく「ボローの否定」ではなく素直に `a < b` をセット。学習用に挙動を単純化。
+ * - V：符号が逆のオペランド同士で、結果が a の符号と逆になったとき発生。
+ */
 function updateFlagsSub(state: MutableCpuState, a: number, b: number, result: number): void {
   const aSign = (a & 0x8000) !== 0
   const bSign = (b & 0x8000) !== 0
@@ -67,10 +96,11 @@ function updateFlagsSub(state: MutableCpuState, a: number, b: number, result: nu
 
   state.flags.Z = result === 0
   state.flags.N = rSign
-  state.flags.C = a < b // ボロー発生
+  state.flags.C = a < b
   state.flags.V = (aSign && !bSign && !rSign) || (!aSign && bSign && rSign)
 }
 
+/** 論理演算（AND/OR/XOR/NOT/SHL/SHR）後のフラグ更新。C と V はクリア固定。 */
 function updateFlagsLogic(state: MutableCpuState, result: number): void {
   state.flags.Z = result === 0
   state.flags.N = (result & 0x8000) !== 0
@@ -78,6 +108,16 @@ function updateFlagsLogic(state: MutableCpuState, result: number): void {
   state.flags.V = false
 }
 
+/**
+ * 1 命令を実行して `state` を破壊的に更新する。
+ *
+ * PC のインクリメントはここでは行わない（呼び出し側 `Cpu.stepForward()` が
+ * ジャンプ系命令以外について +1 する）。ジャンプ系（BEQ/BNE/BLT/BGT/BLE/BGE/JMP/CALL/RET）は
+ * ここで直接 `state.pc` を書き換える。
+ *
+ * 命令のオペランド型は本来パーサーが保証しているが、命令種別ごとに `if (... .type !== ...)` で
+ * 型ガードすることで判別共用体の絞り込みと、想定外データへの安全弁を兼ねている。
+ */
 export function executeInstruction(instr: Instruction, state: MutableCpuState): void {
   switch (instr.type) {
     case 'MOV': {
@@ -168,8 +208,10 @@ export function executeInstruction(instr: Instruction, state: MutableCpuState): 
       break
 
     case 'CALL': {
+      // LR には「呼び出し命令の次の命令インデックス」を入れる。RET でここに戻る。
+      // ネストした関数呼び出しでは LR が上書きされるため、上位の関数が手動で PUSH/POP する必要がある。
       const target = instr.operands[0].type === 'immediate' ? instr.operands[0].value : state.pc
-      state.lr = state.pc + 1 // 次の命令アドレス（命令インデックスベース）
+      state.lr = state.pc + 1
       state.pc = target
       break
     }
@@ -179,6 +221,8 @@ export function executeInstruction(instr: Instruction, state: MutableCpuState): 
       break
 
     case 'PUSH': {
+      // 先にデクリメントしてから書く（フルディセンディングスタック）。
+      // SP を 2 ずつ動かすのは仕様上の取り決め（1 ワードは 16bit だが byte 換算の流儀を踏襲）。
       const [src] = instr.operands
       if (src.type !== 'register') break
       state.sp = (state.sp - 2) & 0xFFFF
@@ -187,6 +231,7 @@ export function executeInstruction(instr: Instruction, state: MutableCpuState): 
     }
 
     case 'POP': {
+      // 先に読んでからインクリメント。PUSH と対称になる。
       const [dst] = instr.operands
       if (dst.type !== 'register') break
       const value = state.memory.read(state.sp)

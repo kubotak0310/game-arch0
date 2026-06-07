@@ -1,4 +1,10 @@
 <script setup lang="ts">
+/**
+ * スタックの中身を上から下に表示するコンポーネント。
+ *
+ * フルディセンディング方式（PUSH 時に先に SP を減らす）に従い、SP がスタックトップを指す。
+ * 一覧は SP の現在値から初期 SP 直前までを 2 ワードずつ列挙する。
+ */
 import { computed } from 'vue'
 import { useCpuStore } from '../../stores/cpu.ts'
 import { useActiveFeatures } from '../../composables/useActiveFeatures.ts'
@@ -6,15 +12,19 @@ import { useActiveFeatures } from '../../composables/useActiveFeatures.ts'
 const cpuStore = useCpuStore()
 const { stackActive } = useActiveFeatures()
 
+/** SP の初期位置。Cpu 側の初期値（0xFFFE）と一致させる。 */
 const INITIAL_SP = 0xfffe
 
 function toHex4(n: number): string {
   return '0x' + n.toString(16).toUpperCase().padStart(4, '0')
 }
 
-// Stack grows downward from 0xFFFE.
-// PUSH: SP -= 2, memory[SP] = value  → SP はデータを指す（full descending）
-// 有効スロット: 0xFFFD, 0xFFFB, 0xFFF9, ... （2バイト刻み）
+/**
+ * スタックに積まれた値を「上→下」の順で配列にして返す。
+ *
+ * - SP が初期位置以上ならスタック空（PUSH 0 回）。
+ * - 各エントリのアドレスは 2 刻み（PUSH/POP の SP 増減幅）。
+ */
 const stackEntries = computed(() => {
   const sp = cpuStore.snapshot.sp
   const mem = cpuStore.snapshot.memory

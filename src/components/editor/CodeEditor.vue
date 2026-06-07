@@ -1,4 +1,16 @@
 <script setup lang="ts">
+/**
+ * CodeMirror 6 を用いたアセンブラ用エディタコンポーネント。
+ *
+ * 提供する機能：
+ * - シンタックスハイライト相当（CodeMirror の minimal セットを土台）
+ * - 現在実行中の行をハイライト（`activeLine`）
+ * - パースエラー行のハイライトと波線（`parseErrors`）
+ * - ソース行 → 命令インデックス（PC）の対応をガター行番号に表示（`lineToPc`）
+ * - 命令・レジスタの自動補完（Tab キーで確定）
+ *
+ * 親には `update:modelValue` を emit するため `v-model` 互換で扱える。
+ */
 import { onMounted, onBeforeUnmount, watch, shallowRef } from 'vue'
 import { minimalSetup, EditorView } from 'codemirror'
 import { EditorState, StateField, StateEffect, Compartment, Prec } from '@codemirror/state'
@@ -34,6 +46,12 @@ const ALL_MNEMONICS = [
 ]
 const ALL_REGISTERS = ['R0', 'R1', 'R2', 'R3', 'R4', 'SP', 'LR']
 
+/**
+ * 補完候補の生成元を作る。
+ *
+ * カーソル位置の行頭から走査して、ニーモニック入力中かオペランド入力中かを判定する。
+ * 先頭に `;` がついていればコメント行なので補完しない。
+ */
 function makeCompletionSource(instructions: readonly string[]) {
   return (context: CompletionContext): CompletionResult | null => {
     const line = context.state.doc.lineAt(context.pos)
@@ -138,7 +156,10 @@ const errorLineField = StateField.define<DecorationSet>({
   provide: f => EditorView.decorations.from(f),
 })
 
-// ParseError[] → CodeMirror Diagnostic[] に変換
+/**
+ * 自前の `ParseError[]` を CodeMirror Lint 用の Diagnostic[] に変換する。
+ * 列情報がない場合は行頭から記号区切りまでを 1 ワードとしてマークする。
+ */
 function toDiagnostics(state: EditorState, errors: readonly ParseError[]) {
   return errors.flatMap(err => {
     try {
@@ -159,6 +180,10 @@ function toDiagnostics(state: EditorState, errors: readonly ParseError[]) {
 
 const lineNumCompartment = new Compartment()
 
+/**
+ * ガター行番号を「ソース行番号」ではなく「対応する命令インデックス（PC値）」に差し替える。
+ * 命令でない行（空行・ラベルのみ）は空欄になる。
+ */
 function makePcLineNumbers(map: Map<number, number> | undefined) {
   return lineNumbers({
     formatNumber: (lineNo: number) => {

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * ステージクリア時に表示する祝賀モーダル。
+ * 両端から紙吹雪を 3 秒間連続噴射し、「次へ」または「復習する」を選ばせる。
+ */
 import { onMounted, onBeforeUnmount } from 'vue'
 import confetti from 'canvas-confetti'
 import type { Stage } from '../../core/stages/types.ts'
@@ -15,6 +19,10 @@ const emit = defineEmits<{
 
 let animFrame: number | null = null
 
+/**
+ * 左右下端から斜めに紙吹雪を打ち上げる。`requestAnimationFrame` で毎フレーム少量噴射し、
+ * 3 秒経過後にアニメーションを停止する。
+ */
 function launchConfetti() {
   const duration = 3000
   const end = Date.now() + duration

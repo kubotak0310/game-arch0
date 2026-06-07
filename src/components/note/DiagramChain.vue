@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 連続した命令（チェーン）の流れを矢印で繋いだ手書き風 SVG 図解。
+ * 「R1 に値を入れる → R2 に値を入れる → 加算する」のような連鎖の説明に使う。
+ */
 import { onMounted, ref } from 'vue'
 import rough from 'roughjs'
 import { INK, MUTED, BASE, txt, arrowDefs, arrow } from './diagramUtils.ts'

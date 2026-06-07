@@ -1,11 +1,18 @@
 <script setup lang="ts">
+/**
+ * ユーザー領域（0x00〜USER_MEM_MAX）の主記憶をテーブル形式で表示するコンポーネント。
+ *
+ * - 8列×8行 = 64セル固定のレイアウト。スタック領域はあえて表示しない（学習者の集中を散らさない）。
+ * - 初期メモリで値が入っているセルはティール色、直近で変化したセルはアンバー色でハイライト。
+ * - LOAD/STORE が未解放の章では dim 表示。
+ */
 import { computed } from 'vue'
 import { useCpuStore } from '../../stores/cpu.ts'
 import { useActiveFeatures } from '../../composables/useActiveFeatures.ts'
 import { USER_MEM_MAX } from '../../core/cpu/instructions.ts'
 
 const COLS = 8
-const ROWS = Math.ceil((USER_MEM_MAX + 1) / COLS) // 8 rows × 8 cols = 64 cells
+const ROWS = Math.ceil((USER_MEM_MAX + 1) / COLS)
 
 const cpuStore = useCpuStore()
 const { memoryActive } = useActiveFeatures()
@@ -13,6 +20,7 @@ const { memoryActive } = useActiveFeatures()
 const changedAddresses = computed(() => new Set(cpuStore.lastResult?.changedMemoryAddresses ?? []))
 const initialAddresses = computed(() => cpuStore.initialMemoryAddresses)
 
+/** メモリを行ごとにグルーピングする。テンプレート側の v-for ネストを抑えるための整形。 */
 const rows = computed(() => {
   const mem = cpuStore.snapshot.memory
   const result: { addr: number; cells: { addr: number; value: number }[] }[] = []
@@ -28,9 +36,11 @@ const rows = computed(() => {
   return result
 })
 
+/** 値表示用：2桁ゼロ埋め16進。例: 10 → `0A`。 */
 function toHex2(n: number): string {
   return n.toString(16).toUpperCase().padStart(2, '0')
 }
+/** アドレス表示用：`0x` 接頭辞付きの2桁16進。 */
 function toHex2addr(n: number): string {
   return '0x' + n.toString(16).toUpperCase().padStart(2, '0')
 }

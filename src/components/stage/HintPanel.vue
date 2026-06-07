@@ -1,4 +1,10 @@
 <script setup lang="ts">
+/**
+ * ヒント段階開示パネル。
+ *
+ * クリックするごとに次のヒントが開示される。最後の要素が `kind: 'answer'` の場合は
+ * ボタンラベルが「答えを見る」になる。ステージ切替時は開示数を 0 にリセット。
+ */
 import { ref, watch, computed } from 'vue'
 import type { Hint } from '../../core/stages/types.ts'
 
@@ -9,6 +15,7 @@ const props = defineProps<{
 
 const revealed = ref(0)
 
+// ステージが変わったら開示数をゼロに戻す（前ステージのヒントは持ち越さない）
 watch(() => props.stageId, () => {
   revealed.value = 0
 })
@@ -17,12 +24,15 @@ function revealNext() {
   if (revealed.value < props.hints.length) revealed.value++
 }
 
+/**
+ * 指定位置までに含まれる `hint` 種別の通し番号を返す。
+ * 例: `[hint, hint, answer]` の `index = 2` → 2（answer 自身はカウントしない）。
+ */
 function hintNumber(index: number): number {
-  // index 番目までの 'hint' kind の数を返す
   return props.hints.slice(0, index + 1).filter(h => h.kind === 'hint').length
 }
 
-// 次に開示するアイテムのラベル
+/** 「次に開示するボタン」のラベル文字列。次が answer なら「答えを見る」、それ以外は「ヒント N を見る」。 */
 const nextRevealLabel = computed(() => {
   const next = props.hints[revealed.value]
   if (!next) return ''

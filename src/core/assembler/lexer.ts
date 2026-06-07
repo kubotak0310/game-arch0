@@ -1,5 +1,13 @@
+/**
+ * ARCH-0 アセンブラのレキサー（字句解析器）。
+ *
+ * ソース文字列を 1 文字ずつ走査して `Token[]` に変換する。コメント（`;` 以降）と
+ * 行内空白を除去し、ニーモニック・レジスタ名・ラベル名はすべて **大文字に正規化**して返す。
+ * `loop:` と `LOOP:` を同一視するための仕様。
+ */
 import type { Token, TokenKind, LexerError } from './types.ts'
 
+/** 全ニーモニック集合。識別子がこれに含まれれば `MNEMONIC` トークンとする。 */
 const ALL_MNEMONICS = new Set([
   'MOV', 'ADD', 'SUB',
   'LOAD', 'STORE',
@@ -9,16 +17,26 @@ const ALL_MNEMONICS = new Set([
   'HALT',
 ])
 
+/** 全レジスタ名集合（汎用 + 制御）。識別子がこれに含まれれば `REGISTER` トークンとする。 */
 const ALL_REGISTERS = new Set([
   'R0', 'R1', 'R2', 'R3', 'R4',
   'LR', 'SP', 'PC',
 ])
 
+/**
+ * 全角文字かを判定する。
+ * IME が ON のままコードを書いた際の典型的なエラー検出に使う（記号類と半角カナ範囲）。
+ */
 function isFullWidth(ch: string): boolean {
   const cp = ch.codePointAt(0) ?? 0
   return (cp >= 0xFF01 && cp <= 0xFF60) || (cp >= 0xFF65 && cp <= 0xFF9F)
 }
 
+/**
+ * 即値リテラル文字列を数値に変換する。
+ * `0x` `0X` 接頭辞で16進、`0b` `0B` 接頭辞で2進、それ以外は10進と解釈する。
+ * パース不能なら null。
+ */
 function parseImmediate(raw: string): number | null {
   if (raw.startsWith('0x') || raw.startsWith('0X')) {
     const n = parseInt(raw.slice(2), 16)
@@ -32,11 +50,21 @@ function parseImmediate(raw: string): number | null {
   return isNaN(n) ? null : n
 }
 
+/** `tokenize()` の返り値。トークン列とレックス段階で見つかったエラー。 */
 export interface TokenizeResult {
   tokens: Token[]
   errors: LexerError[]
 }
 
+/**
+ * ソース文字列をトークン列に変換する。
+ *
+ * - コメント（`;` 以降）は最初に除去する。
+ * - 全角文字はエラーとして報告するが、トークン化処理は続行する（複数エラーをまとめて返すため）。
+ * - 識別子は大文字に正規化する。後ろに `:` が続けばラベル定義、それ以外は
+ *   ニーモニック → レジスタ → ラベル参照 の順で分類する。
+ * - 中身が空の行（空行・コメントだけの行）には `NEWLINE` を出さない（パーサーの分岐数削減のため）。
+ */
 export function tokenize(source: string): TokenizeResult {
   const tokens: Token[] = []
   const errors: LexerError[] = []

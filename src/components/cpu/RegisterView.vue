@@ -1,4 +1,11 @@
 <script setup lang="ts">
+/**
+ * 汎用レジスタ R0〜R4 の値を表示するコンポーネント。
+ *
+ * - 直前ステップで変化したレジスタを緑でハイライトし「前値 → 現値」を併記。
+ * - 値が 0 のレジスタは「未使用」感を出すため薄く表示する（実行の流れを掴みやすくする）。
+ * - RET 直後は R0 行に「戻り値」バッジを出す（呼び出し規約上 R0 が戻り値）。
+ */
 import { computed } from 'vue'
 import { useCpuStore } from '../../stores/cpu.ts'
 
@@ -9,6 +16,7 @@ const REGISTERS = ['R0', 'R1', 'R2', 'R3', 'R4'] as const
 const highlighted = computed(() => new Set(cpuStore.lastResult?.changedRegisters ?? []))
 
 function formatDec(v: number): string { return String(v) }
+/** 4桁ゼロ埋めの16進表記。例: 42 → `0x002A`。 */
 function formatHex(v: number): string {
   return '0x' + v.toString(16).toUpperCase().padStart(4, '0')
 }
@@ -23,6 +31,7 @@ const prevRegValue = (name: string): number | null => {
 }
 
 const isZero = (name: string) => regValue(name) === 0
+/** RET を実行した直後の 1 ステップ間だけ true。R0 横の「戻り値」バッジを出す目的。 */
 const showReturnBadge = computed(() => cpuStore.lastResult?.executedType === 'RET')
 </script>
 

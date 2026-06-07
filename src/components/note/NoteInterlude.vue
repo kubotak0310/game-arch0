@@ -1,4 +1,12 @@
 <script setup lang="ts">
+/**
+ * インタールード（章をまたぐストーリーノート）を表示するモーダル。
+ *
+ * ステージ突入前またはクリア直後に表示する想定。
+ * 「演習を始める」ボタン、または Enter/Esc キーで閉じる（`start` イベントを emit）。
+ *
+ * 図解（registers/flags/alu/...）の差し込みは `page.diagram` フィールドで指定する。
+ */
 import { computed, onMounted, onBeforeUnmount } from 'vue'
 import type { NoteInterlude, Stage } from '../../core/stages/types.ts'
 import DiagramRegister from './DiagramRegister.vue'
@@ -24,10 +32,12 @@ const emit = defineEmits<{
 
 const pages = computed(() => props.interlude[props.locale])
 
+/** 本文を空行（`\n\n`）で段落分割する。レンダリング側は <p> 要素で並べる。 */
 function splitParagraphs(text: string): string[] {
   return text.split('\n\n')
 }
 
+/** Enter / Esc どちらでも閉じる（読み流しと熟読のどちらにも対応）。 */
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' || e.key === 'Escape') {
     e.preventDefault()
